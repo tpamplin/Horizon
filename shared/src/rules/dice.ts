@@ -130,9 +130,7 @@ export function parseDicePool(input: string): DicePool {
     const sides = parseInt(match[2]!, 10);
 
     if (!VALID_SIDES.has(sides)) {
-      throw new Error(
-        `Invalid die size d${sides}. Valid sizes: ${[...VALID_SIDES].join(', ')}.`,
-      );
+      throw new Error(`Invalid die size d${sides}. Valid sizes: ${[...VALID_SIDES].join(', ')}.`);
     }
 
     dice.push({ count, sides });
@@ -233,10 +231,7 @@ function rollDie(sides: number, rng: () => number): number {
  * console.log(result.total); // e.g. 13
  * ```
  */
-export function resolveDiceRoll(
-  pool: DicePool,
-  options: ResolveOptions = {},
-): RollResult {
+export function resolveDiceRoll(pool: DicePool, options: ResolveOptions = {}): RollResult {
   const rng = options.rng ?? Math.random;
   const adversitySides = options.adversitySides ?? DEFAULT_ADVERSITY_SIDES;
 

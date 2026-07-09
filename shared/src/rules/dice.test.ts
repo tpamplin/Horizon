@@ -316,8 +316,7 @@ describe('resolveDiceRoll', () => {
       const pool: DicePool = { dice: [{ count: 3, sides: 6 }], adversity: 0, modifier: 0 };
       const rng = seededRng([0.1, 0.5, 0.9]);
       const result = resolveDiceRoll(pool, { rng });
-      const expectedTotal =
-        expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.9);
+      const expectedTotal = expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.9);
       expect(result.total).toBe(expectedTotal);
     });
 
@@ -325,8 +324,7 @@ describe('resolveDiceRoll', () => {
       const pool: DicePool = { dice: [{ count: 2, sides: 6 }], adversity: 1, modifier: 2 };
       const rng = seededRng([0.1, 0.5, 0.9]);
       const result = resolveDiceRoll(pool, { rng });
-      const expectedTotal =
-        expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.9) + 2;
+      const expectedTotal = expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.9) + 2;
       expect(result.total).toBe(expectedTotal);
     });
   });
