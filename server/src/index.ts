@@ -12,6 +12,9 @@ import cors from '@fastify/cors';
 import { Server as SocketIOServer } from 'socket.io';
 import { config } from './config.js';
 import './models/db.js'; // Initialize database on startup
+import { authMiddleware } from './middleware/auth.js';
+import { errorHandler } from './middleware/error.js';
+import { loggerMiddleware } from './middleware/logger.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -31,6 +34,19 @@ await fastify.register(cors, {
   ],
   credentials: true,
 });
+
+// -----------------------------------------------------------------------------
+// Middleware
+// -----------------------------------------------------------------------------
+
+// Request logger — logs every incoming request
+fastify.addHook('onRequest', loggerMiddleware);
+
+// JWT authentication — verifies Bearer tokens on protected routes
+fastify.addHook('preHandler', authMiddleware);
+
+// Global error handler — consistent JSON error responses
+fastify.setErrorHandler(errorHandler);
 
 // -----------------------------------------------------------------------------
 // Health Check
