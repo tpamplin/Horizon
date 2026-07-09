@@ -87,7 +87,7 @@ export interface Campaign {
   inviteCode: string;
   /**
    * Ruleset or game system version this campaign uses.
-   * Examples: "kids-on-bikes-v1", "custom-pirate-rules".
+   * Examples: "horizon-v1", "custom-pirate-rules".
    * Determines which mechanics plugins are active.
    */
   rulesetVersion: string;
@@ -180,11 +180,13 @@ export interface NPC {
 // -----------------------------------------------------------------------------
 
 /**
- * The six core character stats.
+ * The six core stats in the Horizon game system.
  *
- * Values can be expressed in two formats depending on the ruleset:
- * - **Numeric** (Kids on Bikes base): 0–5+ integers (e.g. `{ cognition: 3 }`)
- * - **Die rating** (custom systems): die size strings (e.g. `{ cognition: "D10" }`)
+ * Horizon is a custom narrative TTRPG system — the rules are coded into the
+ * software rather than written in a separate rulebook. Stats use one of two
+ * formats depending on the campaign's ruleset configuration:
+ * - **Numeric** (default Horizon system): integer values (e.g. `{ cognition: 3 }`)
+ * - **Die rating** (alternate Horizon system): die size strings (e.g. `{ cognition: "D10" }`)
  *
  * All six stats are always present; individual rulesets determine valid ranges.
  */

@@ -8,7 +8,7 @@
 
 ## 1. Overview
 
-A lightweight, theater-of-the-mind VTT for the custom Kids on Bikes-based TTRPG. Unlike grid-and-token VTTs, Horizon is designed for narrative play — the table is a shared space for character sheets, dice, atmosphere, and custom game mechanics.
+Horizon is both the software and the game system — a unified, lightweight, theater-of-the-mind VTT with its own custom TTRPG ruleset. Unlike grid-and-token VTTs, Horizon is designed for narrative play — the table is a shared space for character sheets, dice, atmosphere, and custom game mechanics. The rules are coded into the platform rather than written in a separate rulebook.
 
 **Core principles:**
 
@@ -131,7 +131,7 @@ A **Campaign** is the top-level container. One GM, many players. All data is sco
 | **Campaign**  | Name, description, ruleset version, active background     |
 | **Session**   | Single play session; date, summary, attendance log        |
 | **Player**    | User invited to campaign; can control assigned characters |
-| **Character** | Player character sheet (Kids on Bikes stats + custom)     |
+| **Character** | Player character sheet (Horizon system stats + custom)    |
 | **NPC**       | Non-player character; generated or manual                 |
 | **Handout**   | Image, note, or document shared with players              |
 
@@ -241,7 +241,7 @@ Server-authoritative. Simple, functional, trustworthy. No 3D physics simulation 
 | Feature           | Details                                                                      |
 | ----------------- | ---------------------------------------------------------------------------- |
 | **Standard dice** | d4, d6, d8, d10, d12, d20, d100                                              |
-| **Pool rolls**    | Kids on Bikes: stat dice + adversity dice (e.g., "3d6 + 2a")                 |
+| **Pool rolls**    | Horizon: stat dice + adversity dice (e.g., "3d6 + 2a")                      |
 | **Quick roll**    | Click a stat on any sheet → auto-rolls correct pool                          |
 | **Custom roll**   | Freeform input: "2d8 + 1d6"                                                  |
 | **Animation**     | Simple dice-spin animation (~1 second), then result reveal                   |
@@ -460,7 +460,7 @@ Server → All:     map:viewChanged { center_lat, center_lng, zoom, set_by: "GM"
 
 Deliberately no tactical battle maps — no grid, no tokens, no measurements. This is a storytelling VTT — the "table" is a shared space for sheets, dice, and atmosphere. The dynamic background sets mood; the GM's narration sets the scene. This dramatically reduces scope and keeps the app focused on what the system does well.
 
-The one exception: **city-scale maps.** Many Kids on Bikes stories take place in real towns where spatial relationships matter — "the library is across town from the diner." A shared real-world map (OpenStreetMap via Leaflet) lets the GM and players drop pins, mark locations, and track where everyone is in the city. No grid, no tokens — just a shared sense of place. See §4.10.
+The one exception: **city-scale maps.** Many Horizon stories take place in real towns where spatial relationships matter — "the library is across town from the diner." A shared real-world map (OpenStreetMap via Leaflet) lets the GM and players drop pins, mark locations, and track where everyone is in the city. No grid, no tokens — just a shared sense of place. See §4.10.
 
 ### Server-Authoritative Dice
 

@@ -4,7 +4,7 @@
 
 ---
 
-Horizon is a **virtual tabletop** designed for a custom **Kids on Bikes-based TTRPG**. Unlike grid-and-token VTTs like Foundry or Roll20, Horizon is built for **narrative, theater-of-the-mind play** — the table is a shared space for character sheets, dice, atmosphere, and custom game mechanics.
+Horizon is a **virtual tabletop** and **custom TTRPG system** — the software and the game rules are one unified product. Unlike grid-and-token VTTs like Foundry or Roll20, Horizon is built for **narrative, theater-of-the-mind play** — the table is a shared space for character sheets, dice, atmosphere, and custom game mechanics. The rules are coded into the platform rather than written in a separate rulebook.
 
 ## Why Horizon?
 
