@@ -241,7 +241,7 @@ Server-authoritative. Simple, functional, trustworthy. No 3D physics simulation 
 | Feature           | Details                                                                      |
 | ----------------- | ---------------------------------------------------------------------------- |
 | **Standard dice** | d4, d6, d8, d10, d12, d20, d100                                              |
-| **Pool rolls**    | Horizon: stat dice + adversity dice (e.g., "3d6 + 2a")                      |
+| **Pool rolls**    | Horizon: stat dice + adversity dice (e.g., "3d6 + 2a")                       |
 | **Quick roll**    | Click a stat on any sheet → auto-rolls correct pool                          |
 | **Custom roll**   | Freeform input: "2d8 + 1d6"                                                  |
 | **Animation**     | Simple dice-spin animation (~1 second), then result reveal                   |
