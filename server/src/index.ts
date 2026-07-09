@@ -10,13 +10,7 @@ import { createServer } from 'node:http';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { Server as SocketIOServer } from 'socket.io';
-
-// -----------------------------------------------------------------------------
-// Configuration
-// -----------------------------------------------------------------------------
-
-const PORT = parseInt(process.env.PORT || '3001', 10);
-const HOST = process.env.HOST || '0.0.0.0';
+import { config } from './config.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -24,13 +18,16 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 const fastify = Fastify({
   logger: {
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+    level: config.nodeEnv === 'production' ? 'info' : 'debug',
   },
 });
 
-// Register CORS (allow all origins in dev; tighten in production)
+// Register CORS — allow the Vite dev server origin
 await fastify.register(cors, {
-  origin: true,
+  origin: [
+    'http://localhost:5173',  // Vite dev server
+    'http://127.0.0.1:5173',
+  ],
   credentials: true,
 });
 
@@ -67,8 +64,8 @@ io.on('connection', (socket) => {
 // -----------------------------------------------------------------------------
 
 try {
-  await fastify.listen({ port: PORT, host: HOST });
-  fastify.log.info({ port: PORT, host: HOST }, 'Horizon server is ready');
+  await fastify.listen({ port: config.port, host: config.host });
+  fastify.log.info({ port: config.port, host: config.host }, 'Horizon server is ready');
 } catch (err) {
   fastify.log.error(err);
   process.exit(1);
