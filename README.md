@@ -17,16 +17,16 @@ Horizon is a **virtual tabletop** designed for a custom **Kids on Bikes-based TT
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19 + TypeScript + Vite (plain CSS, dark theme) |
-| Backend | Node.js + Fastify (single process: HTTP + WebSocket) |
-| Real-time | Socket.IO |
-| Database | SQLite via `better-sqlite3` (single file, zero config) |
-| Auth | JWT + bcrypt (15-min access + 7-day refresh token) |
-| Maps | Leaflet + OpenStreetMap (free, no API key) |
-| Testing | Vitest + Playwright |
-| Monorepo | npm workspaces (`client/`, `server/`, `shared/`) |
+| Layer     | Technology                                             |
+| --------- | ------------------------------------------------------ |
+| Frontend  | React 19 + TypeScript + Vite (plain CSS, dark theme)   |
+| Backend   | Node.js + Fastify (single process: HTTP + WebSocket)   |
+| Real-time | Socket.IO                                              |
+| Database  | SQLite via `better-sqlite3` (single file, zero config) |
+| Auth      | JWT + bcrypt (15-min access + 7-day refresh token)     |
+| Maps      | Leaflet + OpenStreetMap (free, no API key)             |
+| Testing   | Vitest + Playwright                                    |
+| Monorepo  | npm workspaces (`client/`, `server/`, `shared/`)       |
 
 **Zero budget.** No paid services, no API keys that require credit cards. Everything runs in a single Node.js process against a single SQLite file.
 
@@ -51,15 +51,15 @@ npm run dev
 
 ### Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start server + client concurrently |
-| `npm run dev -w server` | Start server only |
-| `npm run dev -w client` | Start client only |
-| `npm run build` | Build all packages |
-| `npm test` | Run all tests (Vitest) |
-| `npm run lint` | Lint all TypeScript files |
-| `npm run format` | Format with Prettier |
+| Command                 | Description                        |
+| ----------------------- | ---------------------------------- |
+| `npm run dev`           | Start server + client concurrently |
+| `npm run dev -w server` | Start server only                  |
+| `npm run dev -w client` | Start client only                  |
+| `npm run build`         | Build all packages                 |
+| `npm test`              | Run all tests (Vitest)             |
+| `npm run lint`          | Lint all TypeScript files          |
+| `npm run format`        | Format with Prettier               |
 
 ## Project Structure
 
@@ -91,14 +91,14 @@ horizon/
 
 **Phase 0 — Project Scaffold** (in progress)
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| 0 — Scaffold | 🟡 In progress | Monorepo skeleton, tooling, configs |
-| 1 — Foundation MVP | ⬜ Planned | Auth, campaigns, sheets, dice, chat, backgrounds |
-| 2 — Real-Time Core | ⬜ Planned | WebSocket sync, live sheets, presence, sessions |
-| 3 — Mechanics & Tools | ⬜ Planned | Wild Magic, NPC generator, GM screen, city maps |
-| 4 — Atmosphere & Polish | ⬜ Planned | Music, spotlight mode, transitions, mobile |
-| 5 — Ecosystem | ⬜ Planned | Import/export, sharing, public API |
+| Phase                   | Status         | Description                                      |
+| ----------------------- | -------------- | ------------------------------------------------ |
+| 0 — Scaffold            | 🟡 In progress | Monorepo skeleton, tooling, configs              |
+| 1 — Foundation MVP      | ⬜ Planned     | Auth, campaigns, sheets, dice, chat, backgrounds |
+| 2 — Real-Time Core      | ⬜ Planned     | WebSocket sync, live sheets, presence, sessions  |
+| 3 — Mechanics & Tools   | ⬜ Planned     | Wild Magic, NPC generator, GM screen, city maps  |
+| 4 — Atmosphere & Polish | ⬜ Planned     | Music, spotlight mode, transitions, mobile       |
+| 5 — Ecosystem           | ⬜ Planned     | Import/export, sharing, public API               |
 
 See [`plan/implementation-plan.md`](plan/implementation-plan.md) for the full task-level roadmap.
 
