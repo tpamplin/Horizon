@@ -22,7 +22,16 @@ Break down a Horizon Jira epic (HZN project, `wollonof.atlassian.net`) into well
    - Does the system process/respond to the action?
    - Can the user view/manage the resulting state?
    - Is the story independently testable (curl/server log for backend, UI interaction for client)?
-7. **Run self-reflection rubric** — evaluate against the quality criteria below; score ≥4/5 on each before presenting
+7. **Run self-reflection rubric** — evaluate EVERY drafted story against these criteria (1–5 scale, internal only):
+   - User value delivery (no backend-only, no tests-only stories)
+   - Vertical slicing completeness (shared + server + client + tests where applicable)
+   - Anti-pattern avoidance (no battle maps, no Tailwind, no paid APIs, no massive bundles)
+   - Clear acceptance signals (specific, testable, observable outcomes)
+   - Accessibility inclusion (at least one criterion for UI stories)
+   - Naming clarity (action + domain, no vague titles)
+   - Test coverage expectations specified
+   - Layer ordering respected (shared → server → client)
+     Revise any story scoring ≤3 until all criteria ≥4 (max 2 iteration rounds).
 8. **Create in Jira** — one story at a time in execution order so HZN issue numbers match the sequence. **After each story is created, immediately call `editJiraIssue` to set `{"parent": {"key": "HZN-XX"}}` linking it to the parent epic.** The `createJiraIssue` tool does NOT auto-link stories to epics in next-gen Jira projects. Verify the parent link before creating the next story.
 
 ## Story Rules
