@@ -85,6 +85,12 @@ export interface Campaign {
   activeBackgroundUrl: string | null;
   /** Short alphanumeric code that players use to join the campaign. */
   inviteCode: string;
+  /**
+   * Ruleset or game system version this campaign uses.
+   * Examples: "kids-on-bikes-v1", "custom-pirate-rules".
+   * Determines which mechanics plugins are active.
+   */
+  rulesetVersion: string;
   /** ISO 8601 timestamp of when the campaign was created. */
   createdAt: string;
 }
@@ -121,6 +127,11 @@ export interface Character {
   playerUserId: string;
   /** Character name (e.g. "Jamie Reyes"). */
   name: string;
+  /**
+   * Character archetype, class, or identity label.
+   * Examples: "Pirate Shapeshifter", "Small-Town Sheriff", "High School Nerd".
+   */
+  archetype: string;
   /** URL or path to the character's portrait image. */
   portraitUrl: string | null;
   /**
@@ -144,6 +155,11 @@ export interface NPC {
   campaignId: string;
   /** Display name (e.g. "Sheriff Collins"). */
   name: string;
+  /**
+   * NPC archetype, role, or identity label.
+   * Examples: "Corrupt Lawman", "Mysterious Outsider", "Town Bully".
+   */
+  archetype: string;
   /** URL or path to the NPC's portrait image. */
   portraitUrl: string | null;
   /** Archetype template ID if this NPC was generated; null if manual. */
@@ -164,26 +180,32 @@ export interface NPC {
 // -----------------------------------------------------------------------------
 
 /**
- * The six core stats in the Kids on Bikes system.
- * Each stat ranges from 0–5 (or higher with adversity bonuses).
+ * The six core character stats.
+ *
+ * Values can be expressed in two formats depending on the ruleset:
+ * - **Numeric** (Kids on Bikes base): 0–5+ integers (e.g. `{ cognition: 3 }`)
+ * - **Die rating** (custom systems): die size strings (e.g. `{ cognition: "D10" }`)
+ *
+ * All six stats are always present; individual rulesets determine valid ranges.
  */
 export interface CharacterStats {
   /** Mental acuity, memory, book-smarts. */
-  cognition: number;
+  cognition: number | string;
   /** Physical strength, toughness, athleticism. */
-  force: number;
+  force: number | string;
   /** Agility, speed, hand-eye coordination. */
-  reflex: number;
+  reflex: number | string;
   /** Aggression, intimidation, physical confrontation. */
-  conflict: number;
+  conflict: number | string;
   /** Charisma, persuasion, social grace. */
-  influence: number;
+  influence: number | string;
   /** Mental fortitude, composure, resistance to fear/madness. */
-  stability: number;
+  stability: number | string;
 }
 
 /**
- * An item in a character's or NPC's inventory.
+ * An item in a character's or NPC's general inventory.
+ * For items with mechanical effects, see SignatureItem.
  */
 export interface InventoryItem {
   /** Display name of the item. */
@@ -195,23 +217,155 @@ export interface InventoryItem {
 }
 
 /**
+ * A signature or special item with mechanical effects.
+ * Unlike regular inventory items, signature items provide bonuses,
+ * modifiers, or special rules that affect gameplay.
+ *
+ * @example
+ * ```json
+ * {
+ *   "name": "Pirate Hat",
+ *   "description": "A weathered tricorn hat that commands respect.",
+ *   "modifiers": "+5 to all deception, persuasion, and intimidation checks.",
+ *   "rules": "Only the attuned wearer gains this bonus."
+ * }
+ * ```
+ */
+export interface SignatureItem {
+  /** Display name of the item. */
+  name: string;
+  /** Flavor or functional description of the item. */
+  description: string;
+  /** Mechanical modifiers this item provides (e.g. "+2 to all influence rolls"). */
+  modifiers?: string;
+  /** Additional rules or constraints associated with this item. */
+  rules?: string;
+}
+
+/**
+ * A special ability, talent, or power possessed by a character or NPC.
+ *
+ * @example
+ * ```json
+ * {
+ *   "name": "Shapeshifter",
+ *   "effect": "Jeffrey is a true shapeshifter, not only gaining the appearance of any other creature, but also their physical attributes."
+ * }
+ * ```
+ */
+export interface SpecialAbility {
+  /** Name of the ability (e.g. "Survivalist Chef", "Shapeshifter"). */
+  name: string;
+  /** Description of what the ability does, including mechanical effects and bonuses. */
+  effect: string;
+}
+
+/**
+ * A modifier applied at a specific level on a custom track.
+ * Used by track-based mechanics like intoxication, fear, sanity, or corruption.
+ */
+export interface TrackModifier {
+  /** The track value (0-indexed) this modifier applies at. */
+  atLevel: number;
+  /** Human-readable description of the effects at this level. */
+  description: string;
+  /**
+   * Stat modifiers applied at this level.
+   * Keys are stat names; values are the bonus or penalty (e.g. `{ "cognition": 5, "force": -5 }`).
+   */
+  statModifiers?: Record<string, number>;
+  /** Additional rules or triggers that apply at this level. */
+  rules?: string;
+}
+
+/**
+ * A custom track for tracking a character's state along a numeric scale.
+ * Supports per-level modifiers for mechanics like intoxication, fear, sanity,
+ * corruption, hunger, or any other graduated condition.
+ *
+ * @example Intoxication Track (0–10)
+ * ```json
+ * {
+ *   "name": "Intoxication",
+ *   "min": 0,
+ *   "max": 10,
+ *   "current": 3,
+ *   "levels": [
+ *     { "atLevel": 0, "description": "Sober", "statModifiers": { "cognition": 5, "force": -5 } },
+ *     { "atLevel": 5, "description": "The Perfect Buzz", "statModifiers": { "cognition": 3, "force": 3 } }
+ *   ]
+ * }
+ * ```
+ */
+export interface CustomTrack {
+  /** Display name of the track (e.g. "Intoxication", "Fear", "Sanity"). */
+  name: string;
+  /** Minimum value of the track (typically 0). */
+  min: number;
+  /** Maximum value of the track. */
+  max: number;
+  /** Current position on the track. */
+  current: number;
+  /** Per-level modifiers and rules. */
+  levels?: TrackModifier[];
+}
+
+/**
  * Complete sheet data for a Character or NPC.
  * This is the JSON shape stored in the `sheet_data` column.
  * All values are JSON-primitive-friendly — no classes, Dates, Maps, or Sets.
  */
 export interface SheetData {
-  /** The six core character stats. */
+  /** The six core character stats (numeric or die-rating format). */
   stats: CharacterStats;
   /** Current adversity tokens the character holds. */
   adversityTokens: number;
-  /** Freeform character traits (e.g. "Brave", "Clumsy"). */
+  /**
+   * Defining strengths and positive character traits.
+   * Freeform strings describing what the character excels at.
+   */
+  strengths: string[];
+  /**
+   * Defining flaws, weaknesses, or negative character traits.
+   * Freeform strings describing the character's shortcomings.
+   */
+  flaws: string[];
+  /**
+   * General character traits (e.g. "Brave", "Clumsy").
+   * For structured strengths/flaws, use the dedicated fields above.
+   */
   traits: string[];
-  /** Items the character is carrying. */
+  /** General inventory items the character is carrying. */
   inventory: InventoryItem[];
+  /**
+   * Signature or special items with mechanical effects.
+   * These are iconic items that provide bonuses or special rules.
+   */
+  signatureItems: SignatureItem[];
+  /**
+   * Special abilities, talents, or powers the character possesses.
+   */
+  specialAbilities: SpecialAbility[];
   /** Active conditions or status effects (e.g. "Shaken", "Injured"). */
   conditions: string[];
+  /**
+   * Custom tracks for graduated character states.
+   * Examples: Intoxication (0–10), Fear (0–20), Sanity (100–0), Corruption (0–50).
+   */
+  customTracks: CustomTrack[];
+  /**
+   * The character's backstory — personal history, motivations, and key life events.
+   * Rich text; may be multiple paragraphs.
+   */
+  backstory: string;
   /** Freeform GM or player notes about the character. */
   notes: string;
+  /**
+   * Campaign-specific notes that the GM attaches to this character.
+   * Separate from general notes — these are plot hooks, secrets, or session-specific
+   * reminders visible only to the GM.
+   */
+  campaignNotes: string;
 }
 
 // -----------------------------------------------------------------------------
