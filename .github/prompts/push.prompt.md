@@ -46,6 +46,14 @@ refactor(server): extract auth logic into auth service
 style(client): apply dark theme to dice tray component
 ```
 
+## Pre-commit Checklist
+
+Before staging any files:
+
+1. **Verify branch.** `git branch --show-current` — confirm you're on the correct phase branch. Horizon uses `phase/N-short-description` naming (e.g., `phase/0-scaffold`).
+2. **Verify build.** `npm run build` — must pass. Fix any errors before committing.
+3. **Verify tests.** `npm test -w <affected-workspace>` — zero failures in changed code.
+
 ## Process
 
 1. **Check git status.** Run `git status` to see all changed files.

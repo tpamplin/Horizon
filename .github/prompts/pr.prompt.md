@@ -16,7 +16,22 @@ Execute the full push workflow from `push.prompt.md`:
 6. Push to remote (`git push origin <branch>`)
 7. Never force push to `main`
 
-### 2. Create Pull Request
+### 2. Pre-PR Checklist
+
+Before creating the PR, verify:
+
+- [ ] All commits are pushed (`git status` is clean)
+- [ ] `npm run build` passes with zero errors
+- [ ] `npm test` passes with zero failures (or `npm test -w <affected>` for targeted changes)
+- [ ] Branch is up to date with `main` (`git fetch origin main && git merge origin/main`)
+- [ ] No `node_modules/`, `dist/`, `data/`, or `.env` files staged
+- [ ] No tactical battle map code (grid, tokens, measurements)
+- [ ] No CSS frameworks (Tailwind, Bootstrap, CSS-in-JS)
+- [ ] No paid API references or external database dependencies
+- [ ] All new UI components have associated plain CSS
+- [ ] Migration files (if any) are additive only (never edited)
+
+### 3. Create Pull Request
 
 1. Ensure the branch is up to date with `main`:
    ```bash
