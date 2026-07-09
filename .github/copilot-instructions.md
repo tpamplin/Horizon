@@ -227,6 +227,53 @@ npx playwright test       # E2E tests (from Phase 2 onward)
 
 ---
 
+## Safety Guardrails
+
+### Never Violate
+
+- **Never `git push` unless the user explicitly asks** or you're following an approved workflow (push.prompt.md).
+- **Never `git commit` unless** the user asks or you're executing an approved workflow.
+- **Never install new dependencies** without user confirmation.
+- **Never bypass safety checks** (`--no-verify`, `--force`).
+- **Never revert formatting-only changes** — commit them in a dedicated formatting commit.
+- **All compile errors must be resolved before commit or push.**
+
+### Confirm Before
+
+- Deleting files or branches
+- Dropping database tables or deleting data/
+- `git push --force` or `git reset --hard`
+- Amending published commits
+- Modifying shared infrastructure or architectural patterns
+
+### Task-Weight Tiering
+
+Match ceremony to the work. Decide the tier first, then act:
+
+- **Light** (< 5 min: typo, comment, one-liner): just confirm the branch is sane and run a compile check if you touched code. No checklists.
+- **Standard** (focused change across a few files): run the pre-task and post-task skills (`.github/skills/pre-task/SKILL.md`, `.github/skills/post-task/SKILL.md`).
+- **Full** (story or multi-file feature): run the complete `/implement` flow (decompose → subtasks → execute → verify).
+
+### Autopilot Override
+
+When you hit an explicit pause gate, STOP. Stopping IS the correct completion. Gates include:
+
+- Missing required component (no plain CSS styles defined for a new UI element)
+- Destructive change needed (file deletion, schema drop)
+- New dependency required (npm install without prior approval)
+- Blocking test failure (zero failures is the only acceptable state)
+- Jira MCP failure (auth/connection — do not proceed on assumptions)
+- Ambiguous acceptance criteria (ask, don't guess)
+
+### Intent & Architecture
+
+- Treat the design doc (`plan/vtt-design-doc.md`) and implementation plan as the intent baseline.
+- Don't change architecture without discussion — present alternatives as recommendations.
+- Don't build features from future phases (check `plan/implementation-plan.md` first).
+- Only update documentation when the change makes it stale — don't proactively rewrite docs.
+
+---
+
 ## Key Design Decisions (Don't Overturn These)
 
 These are settled. Don't propose alternatives unless you have a very strong reason:
