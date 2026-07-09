@@ -36,3 +36,13 @@ export type {
   MechanicProps,
   GameMechanic,
 } from './mechanic-interface.js';
+
+export type {
+  DiceGroup,
+  DicePool,
+  RollResult,
+  DieSides,
+  ResolveOptions,
+} from './rules/dice.js';
+
+export { parseDicePool, resolveDiceRoll } from './rules/dice.js';
