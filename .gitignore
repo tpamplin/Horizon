@@ -31,9 +31,16 @@ Thumbs.db
 *.log
 logs/
 
+# Reference (AmpdUp source material - not for this repo)
+.github_reference/
+plan/reference-conversion-plan.md
+
 # Test
 coverage/
 .vitest/
 
 # Vite
 client/dist/
+
+
+/.github_reference
