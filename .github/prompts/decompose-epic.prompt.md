@@ -23,7 +23,7 @@ Break down a Horizon Jira epic (HZN project, `wollonof.atlassian.net`) into well
    - Can the user view/manage the resulting state?
    - Is the story independently testable (curl/server log for backend, UI interaction for client)?
 7. **Run self-reflection rubric** — evaluate against the quality criteria below; score ≥4/5 on each before presenting
-8. **Create in Jira** — one story at a time in execution order so HZN issue numbers match the sequence
+8. **Create in Jira** — one story at a time in execution order so HZN issue numbers match the sequence. **After each story is created, immediately call `editJiraIssue` to set `{"parent": {"key": "HZN-XX"}}` linking it to the parent epic.** The `createJiraIssue` tool does NOT auto-link stories to epics in next-gen Jira projects. Verify the parent link before creating the next story.
 
 ## Story Rules
 
@@ -33,6 +33,7 @@ Break down a Horizon Jira epic (HZN project, `wollonof.atlassian.net`) into well
 - Naming: action + domain (e.g., "Add stat-to-dice roll integration", "Sync character sheets in real time"); no vague titles
 - Call out upstream dependencies explicitly — reference parent epic and prerequisite story keys
 - Each story must be independently verifiable: the server story must be testable via curl or Vitest; the client story must be testable by interacting with the UI
+- **Every story MUST be linked to its parent epic** via `editJiraIssue` immediately after creation. Orphaned stories (no epic parent) are a defect.
 
 ## Anti-Patterns to Avoid
 

@@ -37,6 +37,7 @@ Create a Jira story for the **Horizon** project (HZN) using the Atlassian MCP (`
 7. **Call out dependencies** — note upstream story or epic blockers explicitly. Reference the impl plan phase.
 8. **Testing expectations** — Vitest unit/integration for shared rules and server services; Playwright E2E from Phase 2 onward. No paid testing services.
 9. **Conventional commits** — mention expected commit scopes: `shared`, `server`, `client`, `plan`, `vscode`, `deps`.
+10. **ALWAYS set the parent epic** — when creating a story under an epic, you MUST use `editJiraIssue` to set `{"parent": {"key": "HZN-XX"}}` immediately after creation. The `createJiraIssue` tool does NOT auto-link stories to epics in next-gen Jira projects. Never leave a story orphaned — every story must be parented before moving on to create the next one.
 
 ## Horizon-Specific Constraints
 
