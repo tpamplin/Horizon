@@ -26,3 +26,13 @@ export type {
   ChatContent,
   ChatMessage,
 } from './types.js';
+
+export type {
+  MechanicCategory,
+  SheetChanges,
+  MechanicEvent,
+  MechanicResult,
+  MechanicContext,
+  MechanicProps,
+  GameMechanic,
+} from './mechanic-interface.js';
