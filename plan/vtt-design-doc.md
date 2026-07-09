@@ -328,7 +328,7 @@ interface GameMechanic {
   id: string; // "wild-magic", "fear-tracker"
   name: string; // "Wild Magic Generator"
   description: string;
-  category: "dice" | "tracker" | "generator" | "narrative";
+  category: 'dice' | 'tracker' | 'generator' | 'narrative';
   Component: React.FC<MechanicProps>;
   serverHandler?: (event: MechanicEvent, ctx: MechanicContext) => Promise<MechanicResult>;
 }
