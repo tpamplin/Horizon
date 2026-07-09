@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev:server",
+      "type": "shell",
+      "command": "npm run dev -w server",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "group": "server", "panel": "dedicated" }
+    },
+    {
+      "label": "dev:client",
+      "type": "shell",
+      "command": "npm run dev -w client",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "group": "client", "panel": "dedicated" }
+    },
+    {
+      "label": "dev:all",
+      "dependsOn": ["dev:server", "dev:client"],
+      "problemMatcher": []
+    },
+    {
+      "label": "build:all",
+      "type": "shell",
+      "command": "npm run build",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "db:migrate",
+      "type": "shell",
+      "command": "npm run migrate -w server",
+      "problemMatcher": []
+    },
+    {
+      "label": "db:seed",
+      "type": "shell",
+      "command": "npm run seed -w server",
+      "problemMatcher": []
+    }
+  ]
+}
