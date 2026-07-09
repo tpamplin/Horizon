@@ -11,6 +11,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { Server as SocketIOServer } from 'socket.io';
 import { config } from './config.js';
+import './models/db.js'; // Initialize database on startup
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -25,7 +26,7 @@ const fastify = Fastify({
 // Register CORS — allow the Vite dev server origin
 await fastify.register(cors, {
   origin: [
-    'http://localhost:5173',  // Vite dev server
+    'http://localhost:5173', // Vite dev server
     'http://127.0.0.1:5173',
   ],
   credentials: true,
