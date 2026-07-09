@@ -12,6 +12,8 @@ Plan and implement a Horizon Jira story (HZN project, `wollonof.atlassian.net`):
 /implement HZN-####
 ```
 
+> **Note:** If the user types `SS-####` instead of `HZN-####`, treat it as `HZN-####` — the developer works on both projects and may mix up the keys. This is the only allowed cross-project reference.
+
 ## Instructions
 
 Execute the following steps **inline** — do not delegate planning to a subagent.
