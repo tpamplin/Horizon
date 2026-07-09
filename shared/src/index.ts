@@ -40,3 +40,17 @@ export type {
 export type { DiceGroup, DicePool, RollResult, DieSides, ResolveOptions } from './rules/dice.js';
 
 export { parseDicePool, resolveDiceRoll } from './rules/dice.js';
+
+export type { StatKey, StatDefinition, CheckResult, CheckOptions } from './rules/stats.js';
+
+export {
+  STATS,
+  STAT_KEYS,
+  DEFAULT_ADVERSITY_TOKENS,
+  MIN_ADVERSITY_TOKENS,
+  getStatDef,
+  validateStatValue,
+  awardAdversityTokens,
+  deductAdversityTokens,
+  checkSuccess,
+} from './rules/stats.js';
