@@ -8,6 +8,7 @@ import { useAuthStore } from './stores/authStore.js';
 function HomePage() {
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  const logout = useAuthStore((s) => s.logout);
 
   return (
     <main
@@ -48,6 +49,23 @@ function HomePage() {
           >
             My Campaigns
           </Link>
+          <button
+            type="button"
+            onClick={logout}
+            style={{
+              padding: '0.5rem 1.5rem',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: 'var(--color-text)',
+              background: 'transparent',
+              border: '1px solid var(--color-border)',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              opacity: 0.7,
+            }}
+          >
+            Log Out
+          </button>
         </div>
       ) : (
         <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
