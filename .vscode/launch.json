@@ -17,9 +17,10 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/client/src",
+      "webRoot": "${workspaceFolder}/client",
+      "preLaunchTask": "dev:client",
       "sourceMapPathOverrides": {
-        "webpack:///./src/*": "${webRoot}/*"
+        "webpack:///./src/*": "${webRoot}/src/*"
       }
     },
     {
