@@ -16,6 +16,7 @@ import { authMiddleware } from './middleware/auth.js';
 import { errorHandler } from './middleware/error.js';
 import { loggerOnRequest, loggerOnResponse } from './middleware/logger.js';
 import authRoutes from './routes/auth.js';
+import campaignRoutes from './routes/campaigns.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -56,6 +57,9 @@ fastify.setErrorHandler(errorHandler);
 
 // Auth routes (public — register, login, refresh, me)
 await fastify.register(authRoutes);
+
+// Campaign routes (protected — require JWT)
+await fastify.register(campaignRoutes);
 
 // -----------------------------------------------------------------------------
 // Health Check
