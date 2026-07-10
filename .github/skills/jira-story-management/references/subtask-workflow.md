@@ -3,11 +3,20 @@
 ## Standard Workflow
 
 - Use Atlassian MCP (`wollonof.atlassian.net`) for Jira context; never ask the user for keys/status if MCP is available.
-- Create subtasks **one at a time in execution order** — do not batch or parallelize. Wait for each issue key before creating the next so numbering matches the planned sequence.
 - **Always set the parent** via `editJiraIssue` with `{"parent": {"key": "HZN-XX"}}` immediately after each subtask creation. The `createJiraIssue` tool does NOT auto-link to the parent story in next-gen Jira projects.
 - **Always set the assignee** — call `atlassianUserInfo` once to get the current user's `accountId`, then include `assignee_account_id` in every `createJiraIssue` call. Never hardcode account IDs.
 - Transition a subtask to **In Progress** before making any code or doc changes.
 - Focus on one subtask at a time unless explicitly allowed otherwise.
+
+### CRITICAL — Create Subtasks in Dependency Order (One at a Time)
+
+**Subtask keys become the permanent execution sequence.** If subtasks are created out of order, the keys won't reflect the dependency chain and the board will be confusing. This applies to story decomposition into subtasks too.
+
+1. **Write the execution order BEFORE creating anything** — a numbered list of subtasks in dependency sequence.
+2. **Create one subtask at a time.** Call `createJiraIssue`, wait for the response, record the key.
+3. **Verify the key matches your expected position.**
+4. **Only then** create the next subtask.
+5. **Never batch or parallelize subtask creation.** Do not create subtask #2 until subtask #1's key is confirmed.
 
 ### Jira Description Formatting
 

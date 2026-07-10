@@ -181,6 +181,19 @@ Present a structured summary:
 
 After presenting the summary, if there are findings, offer: "Apply fixes with `/fix`."
 
+### Phase 6 — Auto-Transition on Approval (Jira stories only)
+
+If the verdict is **✅ APPROVED** and the review was for a Jira story (not a freeform description):
+
+1. Check the issue type from the Phase 1 Jira fetch (`issuetype.name`).
+2. **If the issue is an Epic** — do NOT transition. Epics are closed manually when all child stories are complete. State that the epic must be closed manually.
+3. **If the issue is NOT an Epic** (Story, Task, Bug, etc.):
+   - Fetch available transitions via `getTransitionsForJiraIssue`.
+   - Find the transition with name matching `Done` (case-insensitive).
+   - If found, transition the issue via `transitionJiraIssue`.
+   - Report: "✅ HZN-#### transitioned to Done."
+   - If "Done" is not available (e.g. custom workflow), report the available transitions and ask the user to transition manually.
+
 ---
 
 ## Review Scope by Task Weight

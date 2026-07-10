@@ -34,19 +34,19 @@ Apply fixes for issues identified in a recently completed code review. The agent
 
 Common review findings in Horizon and their fixes:
 
-| Finding | Fix |
-|---|---|
-| Tailwind/CSS-in-JS used | Replace with plain CSS + `theme.css` custom properties |
-| Battle map code (grid, tokens, measurements) | Remove; theater-of-the-mind only |
-| Client-side dice RNG | Move to `server/src/services/dice.ts`; client animation is cosmetic |
-| Redux imports | Replace with Zustand stores |
-| Paid API references | Remove; use free alternatives (OpenStreetMap not Google Maps, etc.) |
-| External database references | Remove; SQLite only |
-| Missing test coverage | Add Vitest tests for shared rules and server services |
-| Migration file edited (not additive) | Revert; create a new migration file instead |
-| Scattered `process.env` reads | Centralize in `server/src/config.ts` |
-| Missing JSDoc on exported types | Add JSDoc descriptions |
-| `any` type without justification | Add explicit type or comment explaining why |
+| Finding                                      | Fix                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| Tailwind/CSS-in-JS used                      | Replace with plain CSS + `theme.css` custom properties              |
+| Battle map code (grid, tokens, measurements) | Remove; theater-of-the-mind only                                    |
+| Client-side dice RNG                         | Move to `server/src/services/dice.ts`; client animation is cosmetic |
+| Redux imports                                | Replace with Zustand stores                                         |
+| Paid API references                          | Remove; use free alternatives (OpenStreetMap not Google Maps, etc.) |
+| External database references                 | Remove; SQLite only                                                 |
+| Missing test coverage                        | Add Vitest tests for shared rules and server services               |
+| Migration file edited (not additive)         | Revert; create a new migration file instead                         |
+| Scattered `process.env` reads                | Centralize in `server/src/config.ts`                                |
+| Missing JSDoc on exported types              | Add JSDoc descriptions                                              |
+| `any` type without justification             | Add explicit type or comment explaining why                         |
 
 ## Input
 

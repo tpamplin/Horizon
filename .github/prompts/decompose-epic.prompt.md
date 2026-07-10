@@ -32,6 +32,50 @@ Break down a Horizon Jira epic (HZN project, `wollonof.atlassian.net`) into well
    - Test coverage expectations specified
    - Layer ordering respected (shared → server → client)
      Revise any story scoring ≤3 until all criteria ≥4 (max 2 iteration rounds).
+
+### CRITICAL — Create in Dependency Order (One at a Time)
+
+**The HZN issue key becomes the permanent execution sequence number.** If you create stories out of order, the keys won't match the dependency chain and the board will be a mess. This is non-negotiable.
+
+#### Pre-Creation Checklist
+
+Before calling `createJiraIssue` for ANY story:
+
+1. **Write out the full execution order** — a numbered list of every story in the sequence it must be implemented. This list IS the create order. Example:
+   ```
+   1. HZN-?? (shared types/rules — no deps)
+   2. HZN-?? (server endpoint A — depends on #1)
+   3. HZN-?? (server endpoint B — depends on #2)
+   4. HZN-?? (client UI — depends on #3)
+   5. HZN-?? (E2E tests — depends on #4)
+   ```
+2. **Verify each story's prerequisites appear BEFORE it** in the list. If story B needs story A, story A must have a lower HZN key.
+3. **Present the order to the user** and confirm before creating anything.
+
+#### Creation Loop
+
+For each story in the ordered list, **one at a time**:
+
+1. Call `createJiraIssue` with the story details.
+2. **Wait for the response** — you need the HZN key before proceeding.
+3. Immediately call `editJiraIssue` to set `{"parent": {"key": "HZN-XX"}}` linking to the parent epic.
+4. **Verify the key matches your expected position** in the sequence.
+5. **Update your ordered list** with the actual key (e.g. `1. HZN-62 — ...`).
+6. **Only then** proceed to create the next story.
+
+**Never batch-create stories.** Never call `createJiraIssue` for the next story until the previous one's key is received and verified. This is the ONLY way to guarantee HZN keys match the execution sequence.
+
+#### Anti-Pattern
+
+```
+❌ "I'll just create all 9 stories at once"
+   → Keys will be assigned in arbitrary order, not dependency order
+   → HZN-69 might depend on HZN-70, making the board unreadable
+
+✅ Create one at a time, wait for each key, verify position
+   → HZN-62 completes before HZN-63 starts → keys match dependency chain
+```
+
 8. **Create in Jira** — one story at a time in execution order so HZN issue numbers match the sequence. **After each story is created, immediately call `editJiraIssue` to set `{"parent": {"key": "HZN-XX"}}` linking it to the parent epic.** The `createJiraIssue` tool does NOT auto-link stories to epics in next-gen Jira projects. Verify the parent link before creating the next story.
 
 ## Story Rules
