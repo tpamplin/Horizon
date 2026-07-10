@@ -15,6 +15,7 @@ import './models/db.js'; // Initialize database on startup
 import { authMiddleware } from './middleware/auth.js';
 import { errorHandler } from './middleware/error.js';
 import { loggerOnRequest, loggerOnResponse } from './middleware/logger.js';
+import authRoutes from './routes/auth.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -48,6 +49,13 @@ fastify.addHook('preHandler', authMiddleware);
 
 // Global error handler — consistent JSON error responses
 fastify.setErrorHandler(errorHandler);
+
+// -----------------------------------------------------------------------------
+// Routes
+// -----------------------------------------------------------------------------
+
+// Auth routes (public — register, login, refresh, me)
+await fastify.register(authRoutes);
 
 // -----------------------------------------------------------------------------
 // Health Check

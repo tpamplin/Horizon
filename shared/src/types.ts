@@ -64,6 +64,47 @@ export interface RefreshToken {
 }
 
 // -----------------------------------------------------------------------------
+// Auth API — Request & Response Types
+// -----------------------------------------------------------------------------
+
+/** Payload for POST /api/auth/register. */
+export interface RegisterRequest {
+  /** User's email address. Must be unique across all users. */
+  email: string;
+  /** Plain-text password. Must be at least 8 characters. Never logged or stored. */
+  password: string;
+  /** Display name shown to other players and the GM. */
+  displayName: string;
+}
+
+/** Payload for POST /api/auth/login. */
+export interface LoginRequest {
+  /** Registered email address. */
+  email: string;
+  /** Plain-text password. Compared against the stored bcrypt hash. */
+  password: string;
+}
+
+/** Payload for POST /api/auth/refresh. */
+export interface RefreshRequest {
+  /** Opaque refresh token string issued during login or previous refresh. */
+  refresh_token: string;
+}
+
+/**
+ * Unified response for all auth operations that return tokens.
+ * Used by register, login, and refresh endpoints.
+ */
+export interface AuthResponse {
+  /** Short-lived JWT access token (15-minute expiry). */
+  access_token: string;
+  /** Long-lived opaque refresh token (7-day expiry, rotated on each use). */
+  refresh_token: string;
+  /** The authenticated user. */
+  user: User;
+}
+
+// -----------------------------------------------------------------------------
 // Campaign & Membership
 // -----------------------------------------------------------------------------
 

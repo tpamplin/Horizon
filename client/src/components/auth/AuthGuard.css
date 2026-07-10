@@ -1,0 +1,26 @@
+/* =============================================================================
+   AuthGuard — Loading State
+   ============================================================================= */
+
+.auth-guard-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.auth-guard-loading__spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: auth-guard-spin 0.7s linear infinite;
+}
+
+@keyframes auth-guard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -43,6 +43,8 @@ declare module 'fastify' {
 const PUBLIC_PREFIXES = ['/api/auth/', '/api/health'];
 
 function isPublicPath(url: string): boolean {
+  // /api/auth/me is protected — requires a valid JWT
+  if (url === '/api/auth/me') return false;
   return PUBLIC_PREFIXES.some((prefix) => url.startsWith(prefix));
 }
 
