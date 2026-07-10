@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { RegisterPage } from './components/auth/RegisterPage.js';
 import { LoginPage } from './components/auth/LoginPage.js';
 import { AuthGuard } from './components/auth/AuthGuard.js';
+import { CampaignListPage } from './components/campaigns/CampaignListPage.js';
+import { CampaignLayout } from './components/campaigns/CampaignLayout.js';
 import { useAuthStore } from './stores/authStore.js';
 
 function HomePage() {
@@ -104,6 +106,15 @@ function HomePage() {
   );
 }
 
+/** Minimal placeholder for future feature pages. */
+function PlaceholderPage({ title }: { title: string }) {
+  return (
+    <div className="campaign-placeholder">
+      <p>{title} — coming soon</p>
+    </div>
+  );
+}
+
 export function App() {
   const initialize = useAuthStore((s) => s.initialize);
 
@@ -120,10 +131,24 @@ export function App() {
           path="/campaigns"
           element={
             <AuthGuard>
-              <HomePage />
+              <CampaignListPage />
             </AuthGuard>
           }
         />
+        <Route
+          path="/campaigns/:id"
+          element={
+            <AuthGuard>
+              <CampaignLayout />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<PlaceholderPage title="Campaign" />} />
+          <Route path="sheets" element={<PlaceholderPage title="Sheets" />} />
+          <Route path="dice" element={<PlaceholderPage title="Dice" />} />
+          <Route path="chat" element={<PlaceholderPage title="Chat" />} />
+          <Route path="backgrounds" element={<PlaceholderPage title="Backgrounds" />} />
+        </Route>
         <Route path="/" element={<HomePage />} />
       </Routes>
     </BrowserRouter>

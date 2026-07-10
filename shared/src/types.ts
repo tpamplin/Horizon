@@ -134,6 +134,8 @@ export interface Campaign {
   rulesetVersion: string;
   /** ISO 8601 timestamp of when the campaign was created. */
   createdAt: string;
+  /** Number of players in the campaign (populated on list queries). */
+  playerCount?: number;
 }
 
 /**
@@ -147,6 +149,65 @@ export interface CampaignPlayer {
   userId: string;
   /** The role this user holds within the campaign. */
   role: CampaignRole;
+}
+
+// -----------------------------------------------------------------------------
+// Campaign API — Request & Response Types
+// -----------------------------------------------------------------------------
+
+/** Payload for POST /api/campaigns. */
+export interface CreateCampaignRequest {
+  /** Display name of the campaign. Must be at least 2 characters. */
+  name: string;
+  /** Optional short description or premise of the campaign. */
+  description?: string;
+}
+
+/**
+ * Response for GET /api/campaigns/:id — campaign detail enriched with
+ * membership and character lists.
+ */
+export interface CampaignDetailResponse {
+  /** Unique identifier. */
+  id: string;
+  /** Display name of the campaign. */
+  name: string;
+  /** Short description or premise of the campaign. */
+  description: string;
+  /** User ID of the Game Master who owns this campaign. */
+  gmUserId: string;
+  /** URL or path to the currently active scene background image. */
+  activeBackgroundUrl: string | null;
+  /** Short alphanumeric code that players use to join the campaign. */
+  inviteCode: string;
+  /** Ruleset version this campaign uses (e.g. "horizon-v1"). */
+  rulesetVersion: string;
+  /** ISO 8601 timestamp of when the campaign was created. */
+  createdAt: string;
+  /** List of players in the campaign with their roles. */
+  players: CampaignPlayerDetail[];
+  /** List of characters in the campaign. */
+  characters: CampaignCharacterBrief[];
+}
+
+/** Minimal player info embedded in campaign detail. */
+export interface CampaignPlayerDetail {
+  /** User ID. */
+  userId: string;
+  /** Display name of the player. */
+  displayName: string;
+  /** Role the player holds in this campaign. */
+  role: CampaignRole;
+}
+
+/** Minimal character info embedded in campaign detail. */
+export interface CampaignCharacterBrief {
+  /** Character ID. */
+  id: string;
+  /** Character name. */
+  name: string;
+  /** Character archetype. */
+  archetype: string;
 }
 
 // -----------------------------------------------------------------------------

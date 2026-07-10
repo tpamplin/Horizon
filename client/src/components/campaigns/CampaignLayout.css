@@ -1,0 +1,305 @@
+/* =============================================================================
+   Horizon — Campaign Layout Styles
+   ============================================================================= */
+
+.campaign-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-sans);
+}
+
+/* -----------------------------------------------------------------------------
+   Loading / Error States
+   ----------------------------------------------------------------------------- */
+
+.layout-loading,
+.layout-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+}
+
+.layout-loading .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-surface-overlay);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.layout-error {
+  color: var(--color-error);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* -----------------------------------------------------------------------------
+   Sidebar Toggle (mobile)
+   ----------------------------------------------------------------------------- */
+
+.sidebar-toggle {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-overlay);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.15s ease;
+}
+
+.sidebar-toggle:hover {
+  background: var(--color-surface-raised);
+}
+
+/* -----------------------------------------------------------------------------
+   Sidebar
+   ----------------------------------------------------------------------------- */
+
+.campaign-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  width: 240px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-surface-overlay);
+  overflow-y: auto;
+  transition: transform 0.2s ease, width 0.2s ease;
+}
+
+.campaign-sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* Header */
+
+.sidebar-header {
+  padding: 1.25rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--color-surface-overlay);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.back-link:hover {
+  color: var(--color-accent);
+}
+
+.sidebar-campaign-name {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  word-break: break-word;
+}
+
+.sidebar-role-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+}
+
+.role-gm {
+  color: var(--color-warning);
+  background: var(--color-warning-muted);
+}
+
+.role-player {
+  color: var(--color-success);
+  background: var(--color-success-muted);
+}
+
+/* Nav */
+
+.sidebar-nav {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  outline: none;
+}
+
+.nav-link:hover {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.nav-link:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
+}
+
+.nav-link.active,
+.nav-link[aria-current="page"] {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.nav-icon {
+  font-size: 1rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer — Player List */
+
+.sidebar-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--color-surface-overlay);
+}
+
+.sidebar-section-title {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.player-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-gm {
+  background: var(--color-warning);
+}
+
+.dot-player {
+  background: var(--color-success);
+}
+
+.player-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* -----------------------------------------------------------------------------
+   Main Content
+   ----------------------------------------------------------------------------- */
+
+.campaign-main {
+  flex: 1;
+  margin-left: 240px;
+  min-height: 100vh;
+  padding: 1.5rem;
+  transition: margin-left 0.2s ease;
+}
+
+.campaign-sidebar.collapsed ~ .campaign-main {
+  margin-left: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Responsive — collapse sidebar at narrow widths
+   ----------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .campaign-sidebar {
+    width: 240px;
+  }
+
+  .campaign-sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+
+  .campaign-main {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .sidebar-toggle {
+    display: flex;
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .campaign-sidebar.collapsed {
+    transform: translateX(0);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Placeholder content (for child routes without their own page yet)
+   ----------------------------------------------------------------------------- */
+
+.campaign-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 2rem);
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
+}

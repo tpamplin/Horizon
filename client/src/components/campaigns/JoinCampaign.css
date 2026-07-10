@@ -1,0 +1,57 @@
+/* =============================================================================
+   Horizon — Join Campaign Form Styles
+   ============================================================================= */
+
+.join-campaign {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-overlay);
+  border-radius: 8px;
+}
+
+.join-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.join-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.join-row input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  font-family: var(--font-mono, monospace);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-surface-overlay);
+  border-radius: 6px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.join-row input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
+}
+
+.join-row input:disabled {
+  opacity: 0.5;
+}
+
+.join-row .btn {
+  flex-shrink: 0;
+}
+
+.join-error {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-error);
+}
