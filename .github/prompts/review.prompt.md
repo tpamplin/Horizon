@@ -14,6 +14,16 @@ Run a comprehensive, multipart review of completed work against its requirements
 
 Execute all phases sequentially. Do not skip phases. Present findings after each phase before continuing.
 
+### ⚠️ Multi-Agent Awareness
+
+Horizon stories are often decomposed into subtasks that run in parallel across multiple agents. Before flagging something as "missing" or "incomplete," consider:
+
+1. **Check subtask ownership** — If the story has subtasks in Jira, check which are Done vs. In Progress. Unfinished work may belong to a subtask assigned to a different agent that is still running.
+2. **Scope to the story's own ACs** — Only flag gaps that violate the story's explicit acceptance criteria. Do NOT flag missing work that is clearly scoped to a future story (e.g., a placeholder comment saying "expanded in HZN-104").
+3. **Unused types/exports may be intentional** — Types like `CampaignDetailResponse` may be defined for a GET endpoint that a different subtask is building. If they're exported from `shared/` and well-formed, they're forward-compatible, not dead code.
+4. **Tests may live in a separate subtask** — If a "Verification & Wrap-Up" subtask exists (common in Horizon stories), tests are likely owned by that subtask. Note their absence but don't block the review on it unless the story's own ACs require tests inline.
+5. **Concurrent edit detection** — If a file edit fails unexpectedly (replace_string_in_file reports "string not found"), or if a file's content changes between read and write, another agent may be editing the same file. **Stop immediately and report the conflict** — do not retry blindly.
+
 ---
 
 ### Phase 1 — Understand Requirements
@@ -136,6 +146,8 @@ Identify:
 2. **Changes with no corresponding acceptance criterion** — possibly scope creep or unplanned work
 3. **Partial implementations** — feature works but edge cases or error states are missing
 
+**Parallel-work caveat:** Before classifying a gap as critical, check whether the missing work belongs to a different subtask (still in progress) or a future story. If a "Verification & Wrap-Up" subtask exists, tests may be intentionally deferred to it. Note the gap but weight it accordingly — don't reject a story for missing tests if a test-specific subtask is still running.
+
 #### E. Dependency Check (Jira stories only)
 
 - [ ] Prerequisite stories (from the story's Dependencies section) are marked Done in Jira
@@ -175,9 +187,9 @@ Present a structured summary:
 
 **Verdict rules:**
 
-- **❌ REJECTED** — Any critical violation OR any acceptance criterion completely missing
-- **⚠️ APPROVED WITH FINDINGS** — Standard violations only, all ACs at least partially met
-- **✅ APPROVED** — Zero violations, all ACs met, test coverage adequate
+- **❌ REJECTED** — Any critical violation OR any acceptance criterion completely missing. Before rejecting for missing work, verify the missing piece is NOT owned by a parallel subtask or future story.
+- **⚠️ APPROVED WITH FINDINGS** — Standard violations only, all ACs at least partially met. Include a note if tests or ancillary work are expected to arrive via a parallel subtask.
+- **✅ APPROVED** — Zero violations, all ACs met, test coverage adequate (or test subtask is in progress and on track).
 
 After presenting the summary, if there are findings, offer: "Apply fixes with `/fix`."
 

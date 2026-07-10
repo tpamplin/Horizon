@@ -18,6 +18,16 @@ Plan and implement a Horizon Jira story (HZN project, `wollonof.atlassian.net`):
 
 Execute the following steps **inline** — do not delegate planning to a subagent.
 
+### ⚠️ Multi-Agent Awareness
+
+Horizon stories are decomposed into subtasks that may run in parallel across multiple agents. The implement flow creates subtasks sequentially, but other agents may be executing sibling stories or subtasks concurrently.
+
+1. **Pre-edit file verification** — Before editing any file, re-read it to confirm its content hasn't changed since your last read. Another agent may have modified it between your inspection and your edit.
+2. **Concurrent edit detection** — If `replace_string_in_file` fails with "string not found" when the old-string was verified moments earlier, another agent is likely editing the same file. **Stop immediately and report:** "⚠️ Concurrent edit detected on `<file>` — another agent may be working on this file. Halting to avoid conflicts." Do NOT retry with adjusted strings.
+3. **Uncommitted changes before starting** — If `git status` shows uncommitted changes on files you need to touch, check whether those changes belong to your story or a different agent. If they belong to a different agent, stop and report the conflict before proceeding.
+4. **Shared file caution** — Files like `shared/src/types.ts`, `shared/src/index.ts`, `server/src/index.ts`, and `client/src/App.tsx` are aggregation points touched by nearly every story. Expect them to change frequently. Always re-read them immediately before editing, and be prepared for edit conflicts.
+5. **Forward-compatible exports** — When adding types to `shared/`, export them from `shared/src/index.ts` even if no code consumes them yet. Parallel subtasks building server or client layers will need them. This is expected, not dead code.
+
 ### Phase 1 — Fetch Context & Classify
 
 1. Fetch the story via Atlassian MCP (`getJiraIssue`) using the key below.
