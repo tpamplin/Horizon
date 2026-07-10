@@ -1,0 +1,15 @@
+/* =============================================================================
+   Horizon — Background Layer Styles
+   ============================================================================= */
+
+.background-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-surface) 50%, var(--color-bg) 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 0.5s ease;
+  pointer-events: none;
+}

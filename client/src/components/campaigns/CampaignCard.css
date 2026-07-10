@@ -1,0 +1,198 @@
+/* =============================================================================
+   Horizon — Campaign Card Styles
+   ============================================================================= */
+
+.campaign-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-overlay);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.campaign-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.campaign-card:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
+}
+
+.campaign-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.campaign-card-name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.campaign-card-role {
+  flex-shrink: 0;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+}
+
+.role-gm {
+  color: var(--color-warning);
+  background: var(--color-warning-muted);
+}
+
+.role-player {
+  color: var(--color-success);
+  background: var(--color-success-muted);
+}
+
+.campaign-card-desc {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.campaign-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: 0.8125rem;
+  border-top: 1px solid var(--color-surface-overlay);
+  overflow: hidden;
+}
+
+.btn-copy-code {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: var(--font-mono, monospace);
+  color: var(--color-accent);
+  background: var(--color-accent-muted);
+  border: 1px solid var(--color-accent);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  letter-spacing: 0.05em;
+}
+
+.btn-copy-code:hover {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.campaign-card-players {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.campaign-card-enter {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Leave Button
+   ----------------------------------------------------------------------------- */
+
+.btn-leave {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-error);
+  background: transparent;
+  border: 1px solid var(--color-error);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-leave:hover {
+  background: var(--color-error-muted);
+}
+
+/* -----------------------------------------------------------------------------
+   Leave Confirmation Dialog
+   ----------------------------------------------------------------------------- */
+
+.leave-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-backdrop);
+  border-radius: 8px;
+}
+
+.leave-dialog {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-surface-overlay);
+  border-radius: 8px;
+  padding: 1.25rem;
+  max-width: 300px;
+  text-align: center;
+}
+
+.leave-dialog-text {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.leave-dialog-error {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.8125rem;
+  color: var(--color-error);
+}
+
+.leave-dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.btn-danger {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-inverse);
+  background: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
