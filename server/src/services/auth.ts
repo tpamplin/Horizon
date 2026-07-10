@@ -10,7 +10,11 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { config } from '../config.js';
 import { findByEmail, findById, createUser, type UserRow } from '../models/user.js';
-import db from '../models/db.js';
+import {
+  storeRefreshToken,
+  findRefreshTokenByHash,
+  deleteRefreshToken,
+} from '../models/refresh-token.js';
 import type { RegisterRequest, LoginRequest, AuthResponse, User } from 'shared';
 
 // -----------------------------------------------------------------------------
@@ -95,15 +99,7 @@ function generateAndStoreRefreshToken(userId: string): string {
   const tokenHash = createHash('sha256').update(token).digest('hex');
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
-  db.prepare(
-    `INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at)
-     VALUES (@id, @userId, @tokenHash, @expiresAt, datetime('now'))`,
-  ).run({
-    id: randomUUID(),
-    userId,
-    tokenHash,
-    expiresAt,
-  });
+  storeRefreshToken({ userId, tokenHash, expiresAt });
 
   return token;
 }
@@ -236,9 +232,7 @@ export async function refreshToken(token: string): Promise<AuthResponse> {
   const tokenHash = createHash('sha256').update(token).digest('hex');
 
   // Look up the token hash
-  const row = db.prepare(
-    'SELECT id, user_id, expires_at FROM refresh_tokens WHERE token_hash = ?',
-  ).get(tokenHash) as { id: string; user_id: string; expires_at: string } | undefined;
+  const row = findRefreshTokenByHash(tokenHash);
 
   if (!row) {
     throw new TokenRefreshError();
@@ -247,12 +241,12 @@ export async function refreshToken(token: string): Promise<AuthResponse> {
   // Check expiry
   if (new Date(row.expires_at) < new Date()) {
     // Delete expired token
-    db.prepare('DELETE FROM refresh_tokens WHERE id = ?').run(row.id);
+    deleteRefreshToken(row.id);
     throw new TokenRefreshError();
   }
 
   // Delete the old token (rotation)
-  db.prepare('DELETE FROM refresh_tokens WHERE id = ?').run(row.id);
+  deleteRefreshToken(row.id);
 
   // Find the user
   const userRow = findById(row.user_id);

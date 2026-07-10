@@ -1,4 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { RegisterPage } from './components/auth/RegisterPage.js';
+import { LoginPage } from './components/auth/LoginPage.js';
+import { AuthGuard } from './components/auth/AuthGuard.js';
+import { useAuthStore } from './stores/authStore.js';
 
 function WelcomePage() {
   return (
@@ -28,9 +33,25 @@ function WelcomePage() {
 }
 
 export function App() {
+  const initialize = useAuthStore((s) => s.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/campaigns"
+          element={
+            <AuthGuard>
+              <WelcomePage />
+            </AuthGuard>
+          }
+        />
         <Route path="/" element={<WelcomePage />} />
       </Routes>
     </BrowserRouter>

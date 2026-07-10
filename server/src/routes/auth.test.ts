@@ -475,7 +475,11 @@ describe('POST /api/auth/login', () => {
 // =============================================================================
 
 describe('POST /api/auth/refresh', () => {
-  const user = { email: 'refresh@example.com', password: 'password123', displayName: 'Refresh Test' };
+  const user = {
+    email: 'refresh@example.com',
+    password: 'password123',
+    displayName: 'Refresh Test',
+  };
 
   async function registerAndGetTokens() {
     const res = await app.inject({
@@ -501,7 +505,11 @@ describe('POST /api/auth/refresh', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    const body = res.json<{ access_token: string; refresh_token: string; user: { email: string } }>();
+    const body = res.json<{
+      access_token: string;
+      refresh_token: string;
+      user: { email: string };
+    }>();
     expect(body.access_token).toBeTruthy();
     expect(body.refresh_token).toBeTruthy();
     expect(body.user.email).toBe(user.email);
@@ -520,12 +528,16 @@ describe('POST /api/auth/refresh', () => {
     const body = res.json<{ refresh_token: string }>();
 
     // Old token hash should be gone
-    const oldRow = db.prepare('SELECT id FROM refresh_tokens WHERE token_hash = ?').get(oldTokenHash);
+    const oldRow = db
+      .prepare('SELECT id FROM refresh_tokens WHERE token_hash = ?')
+      .get(oldTokenHash);
     expect(oldRow).toBeFalsy();
 
     // New token hash should exist
     const newTokenHash = createHash('sha256').update(body.refresh_token).digest('hex');
-    const newRow = db.prepare('SELECT id FROM refresh_tokens WHERE token_hash = ?').get(newTokenHash);
+    const newRow = db
+      .prepare('SELECT id FROM refresh_tokens WHERE token_hash = ?')
+      .get(newTokenHash);
     expect(newRow).toBeTruthy();
   });
 

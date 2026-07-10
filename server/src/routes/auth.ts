@@ -6,9 +6,19 @@
 // =============================================================================
 
 import type { FastifyInstance } from 'fastify';
-import { register as registerUser, login as loginUser, refreshToken as refreshTokenService } from '../services/auth.js';
-import { DuplicateEmailError, InvalidCredentialsError, TokenRefreshError, ValidationError } from '../services/auth.js';
+import {
+  register as registerUser,
+  login as loginUser,
+  refreshToken as refreshTokenService,
+} from '../services/auth.js';
+import {
+  DuplicateEmailError,
+  InvalidCredentialsError,
+  TokenRefreshError,
+  ValidationError,
+} from '../services/auth.js';
 import type { RegisterRequest, LoginRequest, RefreshRequest } from 'shared';
+import { findById } from '../models/user.js';
 
 // -----------------------------------------------------------------------------
 // JSON Schemas for Fastify body validation
@@ -187,15 +197,16 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
   /**
    * GET /api/auth/me
    *
-   * Return the currently authenticated user from the JWT payload.
+   * Return the currently authenticated user. Looks up the full user row
+   * from the database to include all fields (avatarUrl, createdAt, etc.).
    * The auth middleware (preHandler hook) verifies the Bearer token and
    * attaches the decoded payload to `request.user`.
    *
    * Protected endpoint — requires a valid Bearer token.
    */
   fastify.get('/api/auth/me', async (request, reply) => {
-    const user = request.user;
-    if (!user) {
+    const jwtUser = request.user;
+    if (!jwtUser) {
       return reply.status(401).send({
         error: 'Unauthorized',
         message: 'Authentication required.',
@@ -203,13 +214,22 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
       });
     }
 
+    const userRow = findById(jwtUser.userId);
+    if (!userRow) {
+      return reply.status(401).send({
+        error: 'Unauthorized',
+        message: 'User not found.',
+        statusCode: 401,
+      });
+    }
+
     return reply.status(200).send({
       user: {
-        id: user.userId,
-        email: user.email,
-        displayName: user.displayName,
-        avatarUrl: null,
-        createdAt: '',
+        id: userRow.id,
+        email: userRow.email,
+        displayName: userRow.display_name,
+        avatarUrl: userRow.avatar_url,
+        createdAt: userRow.created_at,
       },
     });
   });
