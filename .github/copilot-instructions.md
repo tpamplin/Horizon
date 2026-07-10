@@ -8,7 +8,7 @@
 
 ## What We're Building
 
-Horizon is a **theater-of-the-mind VTT** for a custom Kids on Bikes-based TTRPG. Unlike grid-and-token VTTs (Foundry, Roll20), Horizon is built for **narrative play** — no tactical battle maps, no token positioning. The "table" is a shared space for character sheets, dice, atmosphere, and custom game mechanics.
+Horizon is a **theater-of-the-mind VTT** built around the custom **Horizon TTRPG system**. Unlike grid-and-token VTTs (Foundry, Roll20), Horizon is built for **narrative play** — no tactical battle maps, no token positioning. The "table" is a shared space for character sheets, dice, atmosphere, and custom game mechanics. The game rules are coded into the software itself rather than written in a separate rulebook.
 
 **Core principles (always follow these):**
 
@@ -306,7 +306,7 @@ These are your primary sources of truth. Read them when you need context:
 ## Quick Context for Common Questions
 
 **Q: Why not use Foundry/Roll20?**
-A: Those are map-first VTTs. Horizon is theater-of-the-mind — built for narrative play with interconnected sheets and custom mechanics. Also, this is a custom Kids on Bikes system, not D&D.
+A: Those are map-first VTTs. Horizon is theater-of-the-mind — built for narrative play with interconnected sheets and custom mechanics. Also, Horizon is its own custom TTRPG system, not D&D.
 
 **Q: Why SQLite instead of PostgreSQL?**
 A: Zero cost, zero setup, single file. For 4–8 concurrent users, SQLite is more than fast enough. Migration to PostgreSQL is straightforward if the app ever needs it.

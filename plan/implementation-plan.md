@@ -134,7 +134,7 @@ This plan breaks Horizon into **6 phases** (0–5). Each phase lists concrete ta
 | ----- | ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
 | 0.2.1 | `shared/types.ts`              | Core types: `User`, `Campaign`, `Character`, `NPC`, `Session`, `DiceRoll`, `ChatMessage`, `SheetData`           |
 | 0.2.2 | `shared/rules/dice.ts`         | Dice pool parser (`"3d6+2a"` → structured pool), roll resolver (pure function — server uses it, client can too) |
-| 0.2.3 | `shared/rules/stats.ts`        | Stat definitions, adversity token rules, Kids on Bikes success/fail logic                                       |
+| 0.2.3 | `shared/rules/stats.ts`        | Stat definitions, adversity token rules, Horizon system success/fail logic                                      |
 | 0.2.4 | `shared/mechanic-interface.ts` | `GameMechanic`, `MechanicProps`, `MechanicEvent`, `MechanicResult` interfaces (see design doc §4.8)             |
 
 ### 0.3 Server Skeleton
