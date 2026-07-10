@@ -140,7 +140,8 @@ async function request<T = unknown>(
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     const message =
-      (errorBody as { message?: string }).message || `Request failed with status ${response.status}`;
+      (errorBody as { message?: string }).message ||
+      `Request failed with status ${response.status}`;
     throw new Error(message);
   }
 

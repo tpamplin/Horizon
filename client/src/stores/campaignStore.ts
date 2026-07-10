@@ -29,12 +29,10 @@ export const useCampaignStore = create<CampaignState>((set) => ({
   activeCampaignId: null,
   setCampaigns: (campaigns) => set({ campaigns }),
   setActiveCampaign: (campaignId) => set({ activeCampaignId: campaignId }),
-  addCampaign: (campaign) =>
-    set((state) => ({ campaigns: [...state.campaigns, campaign] })),
+  addCampaign: (campaign) => set((state) => ({ campaigns: [...state.campaigns, campaign] })),
   removeCampaign: (campaignId) =>
     set((state) => ({
       campaigns: state.campaigns.filter((c) => c.id !== campaignId),
-      activeCampaignId:
-        state.activeCampaignId === campaignId ? null : state.activeCampaignId,
+      activeCampaignId: state.activeCampaignId === campaignId ? null : state.activeCampaignId,
     })),
 }));

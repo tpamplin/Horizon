@@ -139,7 +139,9 @@ export const MIN_ADVERSITY_TOKENS = 0;
  */
 export function awardAdversityTokens(current: number, amount: number): number {
   if (amount < 0) {
-    throw new Error(`Cannot award a negative amount (${amount}). Use deductAdversityTokens to remove tokens.`);
+    throw new Error(
+      `Cannot award a negative amount (${amount}). Use deductAdversityTokens to remove tokens.`,
+    );
   }
   return current + amount;
 }
@@ -154,7 +156,9 @@ export function awardAdversityTokens(current: number, amount: number): number {
  */
 export function deductAdversityTokens(current: number, amount: number): number {
   if (amount < 0) {
-    throw new Error(`Cannot deduct a negative amount (${amount}). Use awardAdversityTokens to add tokens.`);
+    throw new Error(
+      `Cannot deduct a negative amount (${amount}). Use awardAdversityTokens to add tokens.`,
+    );
   }
   return Math.max(MIN_ADVERSITY_TOKENS, current - amount);
 }
