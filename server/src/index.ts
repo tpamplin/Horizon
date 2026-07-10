@@ -14,7 +14,7 @@ import { config } from './config.js';
 import './models/db.js'; // Initialize database on startup
 import { authMiddleware } from './middleware/auth.js';
 import { errorHandler } from './middleware/error.js';
-import { loggerMiddleware } from './middleware/logger.js';
+import { loggerOnRequest, loggerOnResponse } from './middleware/logger.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -39,8 +39,9 @@ await fastify.register(cors, {
 // Middleware
 // -----------------------------------------------------------------------------
 
-// Request logger — logs every incoming request
-fastify.addHook('onRequest', loggerMiddleware);
+// Request logger — onRequest captures start time, onResponse logs completion
+fastify.addHook('onRequest', loggerOnRequest);
+fastify.addHook('onResponse', loggerOnResponse);
 
 // JWT authentication — verifies Bearer tokens on protected routes
 fastify.addHook('preHandler', authMiddleware);

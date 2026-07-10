@@ -8,25 +8,27 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 
 // -----------------------------------------------------------------------------
-// Middleware
+// Types
+// -----------------------------------------------------------------------------
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    /** Timestamp set by the logger onRequest hook, used to compute responseTime in onResponse. */
+    __requestStartTime?: number;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Hooks
 // -----------------------------------------------------------------------------
 
 /**
- * Fastify onRequest + onResponse hook pair that logs request details.
- *
- * Logs at the start (onRequest) and completion (onResponse) of every request:
- * - Method, URL, and remote address on arrival
- * - Status code and response time on completion
- *
- * Uses Fastify's built-in pino logger — no external logging library needed.
+ * Fastify `onRequest` hook — captures the request start time.
+ * Fires before any other hook or handler.
  */
-export async function loggerMiddleware(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
-  const start = Date.now();
+export async function loggerOnRequest(request: FastifyRequest): Promise<void> {
+  request.__requestStartTime = Date.now();
 
-  // Log the incoming request
   request.log.info(
     {
       method: request.method,
@@ -35,23 +37,26 @@ export async function loggerMiddleware(
     },
     'incoming request',
   );
+}
 
-  // Log the completed response
-  reply.then(
-    () => {
-      const responseTime = Date.now() - start;
-      request.log.info(
-        {
-          method: request.method,
-          url: request.url,
-          statusCode: reply.statusCode,
-          responseTime,
-        },
-        'request completed',
-      );
+/**
+ * Fastify `onResponse` hook — logs the completed response.
+ * Fires after the response has been fully sent to the client,
+ * guaranteeing accurate statusCode and true response time.
+ */
+export async function loggerOnResponse(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  const responseTime = Date.now() - (request.__requestStartTime ?? Date.now());
+
+  request.log.info(
+    {
+      method: request.method,
+      url: request.url,
+      statusCode: reply.statusCode,
+      responseTime: `${responseTime}ms`,
     },
-    () => {
-      // Response errored — error handler will log details
-    },
+    'request completed',
   );
 }

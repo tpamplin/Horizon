@@ -59,10 +59,7 @@ function isPublicPath(url: string): boolean {
  * - Returns 401 if the token is missing, malformed, or expired.
  * - Skips verification for public paths (/api/auth/*, /api/health).
  */
-export async function authMiddleware(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<void> {
+export async function authMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   // Skip auth for public paths
   if (isPublicPath(request.url)) {
     return;
@@ -91,7 +88,7 @@ export async function authMiddleware(
   const token = parts[1]!;
 
   try {
-    const payload = jwt.verify(token, config.jwtSecret) as JwtPayload;
+    const payload = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] }) as JwtPayload;
     request.user = payload;
   } catch (err) {
     const message =
