@@ -6,7 +6,16 @@
       "type": "shell",
       "command": "npm run dev -w server",
       "isBackground": true,
-      "problemMatcher": [],
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "listening|Server|started"
+        }
+      },
       "presentation": { "group": "server", "panel": "dedicated" }
     },
     {
@@ -14,7 +23,16 @@
       "type": "shell",
       "command": "npm run dev -w client",
       "isBackground": true,
-      "problemMatcher": [],
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "ready in|Local:"
+        }
+      },
       "presentation": { "group": "client", "panel": "dedicated" }
     },
     {

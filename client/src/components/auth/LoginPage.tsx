@@ -17,7 +17,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const justRegistered = searchParams.get('registered') === 'true';
-  const returnUrl = searchParams.get('return') || '/campaigns';
+  const returnUrl = searchParams.get('return') || '/';
 
   useEffect(() => {
     emailRef.current?.focus();
