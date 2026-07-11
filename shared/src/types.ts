@@ -211,21 +211,64 @@ export interface CampaignCharacterBrief {
 }
 
 // -----------------------------------------------------------------------------
+// Character API — Request & Response Types
+// -----------------------------------------------------------------------------
+
+/** Payload for POST /api/campaigns/:id/characters. */
+export interface CreateCharacterRequest {
+  /** Character name. Must be at least 2 characters. */
+  name: string;
+  /** Character archetype (e.g. "Pirate Shapeshifter", "Small-Town Sheriff"). */
+  archetype: string;
+  /**
+   * Optional initial sheet data. If not provided, the server uses a default
+   * empty SheetData (all stats at 0, empty arrays, no tokens).
+   */
+  sheetData?: Partial<SheetData>;
+}
+
+/** Payload for PUT /api/characters/:id. */
+export interface UpdateCharacterRequest {
+  /** Full replacement of the character's sheet data. */
+  sheetData: SheetData;
+}
+
+/** Payload for POST /api/campaigns/:id/characters (add character to roster). */
+export interface AddCharacterToCampaignRequest {
+  /** The ID of the character to add from the user's library. */
+  characterId: string;
+}
+
+/**
+ * Join table record — tracks which characters are in which campaigns.
+ * A character can be in multiple campaigns simultaneously.
+ */
+export interface CampaignCharacter {
+  /** The campaign the character is rostered in. */
+  campaignId: string;
+  /** The character added to the campaign. */
+  characterId: string;
+  /** The user who added this character to the campaign. */
+  addedBy: string;
+  /** ISO 8601 timestamp of when the character was added. */
+  addedAt: string;
+}
+
+// -----------------------------------------------------------------------------
 // Characters & NPCs
 // -----------------------------------------------------------------------------
 
 /**
- * A player-controlled character within a campaign.
- * Each character is owned by one player and belongs to exactly one campaign.
+ * A player-controlled character in the user's library.
+ * Characters belong to the player, not a campaign. They can be added to
+ * any campaign the player is a member of via the campaign_characters join table.
  * The sheet_data JSON column stores all stats, inventory, traits, and
  * conditions — see SheetData for the structure.
  */
 export interface Character {
   /** Unique identifier. */
   id: string;
-  /** The campaign this character belongs to. */
-  campaignId: string;
-  /** The user (player) who controls this character. */
+  /** The user (player) who owns this character. */
   playerUserId: string;
   /** Character name (e.g. "Jamie Reyes"). */
   name: string;
@@ -246,15 +289,16 @@ export interface Character {
 }
 
 /**
- * A non-player character (NPC) within a campaign.
- * NPCs can be generated from an archetype template or created manually by the GM.
- * They share the same sheet_data structure as Characters.
+ * A non-player character (NPC) in the user's library.
+ * NPCs belong to the user, not a campaign. They can be added to any campaign
+ * the user is a member of via the campaign_npcs join table.
+ * NPCs can be generated from an archetype template or created manually.
  */
 export interface NPC {
   /** Unique identifier. */
   id: string;
-  /** The campaign this NPC belongs to. */
-  campaignId: string;
+  /** The user who owns this NPC. */
+  playerUserId: string;
   /** Display name (e.g. "Sheriff Collins"). */
   name: string;
   /**
@@ -275,6 +319,44 @@ export interface NPC {
   isGenerated: boolean;
   /** ISO 8601 timestamp of when this NPC was created. */
   createdAt: string;
+}
+
+// -----------------------------------------------------------------------------
+// NPC API — Request & Response Types
+// -----------------------------------------------------------------------------
+
+/** Links an NPC to a campaign via the roster. */
+export interface CampaignNPC {
+  /** The campaign the NPC is added to. */
+  campaignId: string;
+  /** The NPC on the roster. */
+  npcId: string;
+  /** User who added this NPC to the campaign. */
+  addedBy: string;
+  /** ISO 8601 timestamp of when the NPC was added. */
+  addedAt: string;
+}
+
+/** Payload for POST /api/npcs. */
+export interface CreateNPCRequest {
+  /** NPC name. Must be at least 2 characters. */
+  name: string;
+  /** NPC archetype (e.g. "Corrupt Lawman", "Town Bully"). */
+  archetype: string;
+  /** Optional initial sheet data. Merged with defaults if not provided. */
+  sheetData?: Partial<SheetData>;
+}
+
+/** Payload for PUT /api/npcs/:id. */
+export interface UpdateNPCRequest {
+  /** Full replacement of the NPC's sheet data. */
+  sheetData: SheetData;
+}
+
+/** Payload for POST /api/campaigns/:id/npcs — add an NPC to a campaign roster. */
+export interface AddNPCToCampaignRequest {
+  /** The ID of the NPC to add from the user's library. */
+  npcId: string;
 }
 
 // -----------------------------------------------------------------------------
