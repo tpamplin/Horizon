@@ -10,8 +10,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useParams, NavLink, Link } from 'react-router-dom';
 import { api } from '../../api/client.js';
 import { useAuthStore } from '../../stores/authStore.js';
+import { useCharacterStore } from '../../stores/characterStore.js';
+import { useNPCStore } from '../../stores/npcStore.js';
 import { BackgroundLayer } from '../background/BackgroundLayer.js';
-import type { CampaignDetailResponse, NPC } from 'shared';
+import type { CampaignDetailResponse, Character, NPC } from 'shared';
 import './CampaignLayout.css';
 
 // -----------------------------------------------------------------------------
@@ -38,6 +40,36 @@ export function CampaignLayout() {
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [campaignNPCs, setCampaignNPCs] = useState<NPC[]>([]);
+
+  // Add-to-campaign modal state
+  const [addModal, setAddModal] = useState<'character' | 'npc' | null>(null);
+  const [libraryItems, setLibraryItems] = useState<(Character | NPC)[]>([]);
+  const [addLoading, setAddLoading] = useState(false);
+  const addToCampaign = useCharacterStore((s) => s.addToCampaign);
+  const addNPCToCampaign = useNPCStore((s) => s.addNPCToCampaign);
+
+  // Open add modal — fetch library, filter out already-added items
+  const openAddModal = useCallback(async (type: 'character' | 'npc') => {
+    setAddModal(type);
+    setAddLoading(true);
+    try {
+      const rosterIds = new Set([
+        ...(detail?.characters?.map((c) => c.id) ?? []),
+        ...campaignNPCs.map((n) => n.id),
+      ]);
+      if (type === 'character') {
+        const chars = await api.get<Character[]>('/api/characters');
+        setLibraryItems(chars.filter((c) => !rosterIds.has(c.id)));
+      } else {
+        const npcs = await api.get<NPC[]>('/api/npcs');
+        setLibraryItems(npcs.filter((n) => !rosterIds.has(n.id)));
+      }
+    } catch {
+      setLibraryItems([]);
+    } finally {
+      setAddLoading(false);
+    }
+  }, [detail, campaignNPCs]);
 
   // Fetch campaign detail on mount
   useEffect(() => {
@@ -148,6 +180,13 @@ export function CampaignLayout() {
               ))}
             </div>
           )}
+          <button
+            type="button"
+            className="sidebar-add-btn"
+            onClick={() => openAddModal('character')}
+          >
+            + Add Character
+          </button>
           {campaignNPCs.length > 0 && (
             <div className="sidebar-characters">
               <span className="sidebar-section-title">NPCs</span>
@@ -163,6 +202,13 @@ export function CampaignLayout() {
               ))}
             </div>
           )}
+          <button
+            type="button"
+            className="sidebar-add-btn"
+            onClick={() => openAddModal('npc')}
+          >
+            + Add NPC
+          </button>
           <div className="sidebar-section-title" style={{ marginTop: '0.75rem' }}>Library</div>
           <Link to="/characters" className="character-link">📋 Character Library</Link>
           <Link to="/npcs" className="character-link">👤 NPC Library</Link>
@@ -177,6 +223,60 @@ export function CampaignLayout() {
           </div>
         </footer>
       </aside>
+
+      {/* Add-to-Campaign Modal */}
+      {addModal && (
+        <div className="add-modal-overlay" role="dialog" aria-label={`Add ${addModal} to campaign`} onClick={() => setAddModal(null)}>
+          <div className="add-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="add-modal-header">
+              <h3>Add {addModal === 'character' ? 'Character' : 'NPC'} from Library</h3>
+              <button className="add-modal-close" onClick={() => setAddModal(null)} aria-label="Close">×</button>
+            </div>
+            {addLoading ? (
+              <p className="add-modal-loading">Loading…</p>
+            ) : libraryItems.length === 0 ? (
+              <p className="add-modal-empty">No {addModal === 'character' ? 'characters' : 'NPCs'} available to add.</p>
+            ) : (
+              <ul className="add-modal-list">
+                {libraryItems.map((item) => {
+                  const isChar = addModal === 'character';
+                  const name = item.name;
+                  const archetype = 'archetype' in item ? item.archetype : '';
+                  return (
+                    <li key={item.id} className="add-modal-item">
+                      <div className="add-modal-item-info">
+                        <span className="add-modal-item-name">{name}</span>
+                        {archetype && <span className="add-modal-item-type">{archetype}</span>}
+                      </div>
+                      <button
+                        type="button"
+                        className="add-modal-add-btn"
+                        onClick={async () => {
+                          if (isChar) {
+                            await addToCampaign(id!, item.id);
+                          } else {
+                            await addNPCToCampaign(id!, item.id);
+                          }
+                          // Refresh campaign detail
+                          const [data, npcs] = await Promise.all([
+                            api.get<CampaignDetailResponse>(`/api/campaigns/${id}`),
+                            api.get<NPC[]>(`/api/campaigns/${id}/npcs`).catch(() => [] as NPC[]),
+                          ]);
+                          setDetail(data);
+                          setCampaignNPCs(npcs);
+                          setLibraryItems((prev) => prev.filter((i) => i.id !== item.id));
+                        }}
+                      >
+                        Add
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
 
       <main className="campaign-main">
         <Outlet />

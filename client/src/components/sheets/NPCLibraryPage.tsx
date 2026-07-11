@@ -65,17 +65,17 @@ export function NPCLibraryPage() {
 
   return (
     <div className="npc-library">
-      <header className="npc-library__header">
+      <header className="npc-library-header">
         <h1>My NPCs</h1>
-        <button className="npc-library__create-btn" onClick={() => setCreateOpen(true)}>
+        <button className="npc-library-create-btn" onClick={() => setCreateOpen(true)}>
           + New NPC
         </button>
       </header>
 
-      {error && <p className="npc-library__error" role="alert">{error}</p>}
+      {error && <p className="npc-library-error" role="alert">{error}</p>}
 
       {createOpen && (
-        <div className="npc-library__create-modal" role="dialog" aria-label="Create NPC">
+        <div className="npc-library-create-modal" role="dialog" aria-label="Create NPC">
           <h2>Create NPC</h2>
           <label>
             Name
@@ -96,24 +96,24 @@ export function NPCLibraryPage() {
               placeholder="e.g. Guard, Merchant, Beast"
             />
           </label>
-          <div className="npc-library__create-actions">
+          <div className="npc-library-create-actions">
             <button onClick={handleCreate} disabled={submitting || !name.trim()}>
               {submitting ? 'Creating…' : 'Create'}
             </button>
-            <button className="npc-library__cancel" onClick={() => setCreateOpen(false)}>
+            <button className="npc-library-cancel" onClick={() => setCreateOpen(false)}>
               Cancel
             </button>
           </div>
         </div>
       )}
 
-      {loading && <p className="npc-library__loading">Loading…</p>}
+      {loading && <p className="npc-library-loading">Loading…</p>}
 
       {!loading && npcs.length === 0 && (
-        <p className="npc-library__empty">No NPCs yet. Build your cast!</p>
+        <p className="npc-library-empty">No NPCs yet. Build your cast!</p>
       )}
 
-      <div className="npc-library__grid">
+      <div className="npc-library-grid">
         {npcs.map((n) => (
           <NPCCard
             key={n.id}
@@ -137,27 +137,27 @@ function NPCCard({ npc, onClick, onDelete }: NPCCardProps) {
   const [confirming, setConfirming] = useState(false);
 
   return (
-    <div className="npcard" onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }} tabIndex={0} role="button">
+    <div className="npc-card" onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }} tabIndex={0} role="button">
       {npc.portraitUrl ? (
-        <img src={npc.portraitUrl} alt={npc.name} className="npcard__portrait" />
+        <img src={npc.portraitUrl} alt={npc.name} className="npc-card-portrait" />
       ) : (
-        <div className="npcard__portrait-placeholder">{npc.name[0]?.toUpperCase()}</div>
+        <div className="npc-card-portrait-placeholder">{npc.name[0]?.toUpperCase()}</div>
       )}
-      <div className="npcard__info">
+      <div className="npc-card-info">
         <h3>{npc.name}</h3>
-        <p className="npcard__archetype">{npc.archetype}</p>
+        <p className="npc-card-archetype">{npc.archetype}</p>
       </div>
-      <div className="npcard__actions">
+      <div className="npc-card-actions">
         {confirming ? (
           <>
             <button
-              className="npcard__delete-confirm"
+              className="npc-card-delete-confirm"
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
             >
               Delete
             </button>
             <button
-              className="npcard__delete-cancel"
+              className="npc-card-delete-cancel"
               onClick={(e) => { e.stopPropagation(); setConfirming(false); }}
             >
               Cancel
@@ -165,7 +165,7 @@ function NPCCard({ npc, onClick, onDelete }: NPCCardProps) {
           </>
         ) : (
           <button
-            className="npcard__delete"
+            className="npc-card-delete"
             onClick={(e) => { e.stopPropagation(); setConfirming(true); }}
             title="Delete NPC"
           >

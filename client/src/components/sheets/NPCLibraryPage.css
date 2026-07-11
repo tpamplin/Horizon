@@ -1,217 +1,231 @@
-/* =============================================================================
+﻿/* =============================================================================
    Horizon — NPC Library Page
+   =============================================================================
+   Dark-themed NPC library grid. Uses theme.css custom properties exclusively.
+   Shares card pattern with CharacterLibraryPage.
    ============================================================================= */
 
 .npc-library {
-  padding: 2rem;
+  padding: var(--space-xl);
   max-width: 960px;
   margin: 0 auto;
 }
 
-.npc-library__header {
+.npc-library-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-lg);
 }
 
-.npc-library__header h1 {
+.npc-library-header h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
 }
 
-.npc-library__create-btn {
-  background: var(--color-primary, #7c5ce7);
-  color: #fff;
+.npc-library-create-btn {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: opacity var(--transition-fast);
 }
 
-.npc-library__create-btn:hover {
+.npc-library-create-btn:hover {
   opacity: 0.85;
 }
 
-.npc-library__error {
-  color: var(--color-danger, #e74c3c);
-  margin-bottom: 1rem;
-  padding: 0.5rem 0.75rem;
-  background: rgba(231, 76, 60, 0.12);
-  border-radius: 4px;
+.npc-library-create-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
-.npc-library__loading,
-.npc-library__empty {
+.npc-library-error {
+  color: var(--color-error);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-error-muted);
+  border-radius: var(--radius-sm);
+}
+
+.npc-library-loading,
+.npc-library-empty {
   text-align: center;
-  color: var(--color-muted, #888);
-  padding: 3rem 0;
+  color: var(--color-text-muted);
+  padding: var(--space-2xl) 0;
   font-style: italic;
 }
 
-/* ---- Create modal ---- */
-
-.npc-library__create-modal {
-  background: var(--color-surface, #1e1e2e);
-  border: 1px solid var(--color-border, #333);
-  border-radius: 10px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+.npc-library-create-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
-.npc-library__create-modal h2 {
-  margin: 0 0 1rem;
-  font-size: 1.15rem;
+.npc-library-create-modal h2 {
+  margin: 0 0 var(--space-md);
+  font-size: var(--font-size-md);
 }
 
-.npc-library__create-modal label {
+.npc-library-create-modal label {
   display: block;
-  margin-bottom: 0.75rem;
-  font-size: 0.85rem;
-  color: var(--color-muted, #aaa);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
 }
 
-.npc-library__create-modal input {
+.npc-library-create-modal input {
   display: block;
   width: 100%;
-  margin-top: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid var(--color-border, #333);
-  background: var(--color-bg, #12121a);
-  color: var(--color-text, #eee);
-  font-size: 0.95rem;
+  margin-top: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
   box-sizing: border-box;
 }
 
-.npc-library__create-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+.npc-library-create-modal input:focus {
+  border-color: var(--color-accent);
+  outline: none;
 }
 
-.npc-library__create-actions button {
-  padding: 0.5rem 1.25rem;
-  border-radius: 6px;
+.npc-library-create-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.npc-library-create-actions button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
-.npc-library__create-actions button:disabled {
+.npc-library-create-actions button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.npc-library__create-actions button:first-child {
-  background: var(--color-primary, #7c5ce7);
-  color: #fff;
+.npc-library-create-actions button:first-child {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
 }
 
-.npc-library__cancel {
+.npc-library-cancel {
   background: transparent;
-  color: var(--color-muted, #aaa);
-  border: 1px solid var(--color-border, #333);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
 }
 
-/* ---- Grid ---- */
+.npc-library-cancel:hover {
+  background: var(--color-surface-raised);
+}
 
-.npc-library__grid {
+.npc-library-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
-/* ---- Card ---- */
-
-.npcard {
-  background: var(--color-surface, #1e1e2e);
-  border: 1px solid var(--color-border, #333);
-  border-radius: 10px;
+.npc-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   display: flex;
   flex-direction: column;
 }
 
-.npcard:hover,
-.npcard:focus-visible {
-  border-color: var(--color-primary, #7c5ce7);
-  box-shadow: 0 0 12px rgba(124, 92, 231, 0.2);
+.npc-card:hover,
+.npc-card:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 12px var(--color-accent-muted);
   outline: none;
 }
 
-.npcard__portrait {
+.npc-card-portrait {
   width: 100%;
   height: 160px;
   object-fit: cover;
 }
 
-.npcard__portrait-placeholder {
+.npc-card-portrait-placeholder {
   width: 100%;
   height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
-  background: var(--color-bg, #12121a);
-  color: var(--color-accent, #f0a040);
+  font-size: var(--font-size-3xl);
+  background: var(--color-bg);
+  color: var(--color-accent);
 }
 
-.npcard__info {
-  padding: 0.75rem;
+.npc-card-info {
+  padding: var(--space-md);
   flex: 1;
 }
 
-.npcard__info h3 {
+.npc-card-info h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
 }
 
-.npcard__archetype {
-  margin: 0.25rem 0 0;
-  font-size: 0.8rem;
-  color: var(--color-muted, #888);
+.npc-card-archetype {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
 }
 
-.npcard__actions {
-  padding: 0 0.75rem 0.75rem;
+.npc-card-actions {
+  padding: 0 var(--space-md) var(--space-md);
   display: flex;
-  gap: 0.4rem;
+  gap: var(--space-xs);
 }
 
-.npcard__delete {
+.npc-card-delete {
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   opacity: 0.5;
-  padding: 0.2rem;
+  padding: var(--space-xs);
 }
 
-.npcard__delete:hover {
+.npc-card-delete:hover {
   opacity: 1;
-  color: var(--color-danger, #e74c3c);
+  color: var(--color-error);
 }
 
-.npcard__delete-confirm {
-  background: var(--color-danger, #e74c3c);
-  color: #fff;
+.npc-card-delete-confirm {
+  background: var(--color-error);
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 4px;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
   cursor: pointer;
 }
 
-.npcard__delete-cancel {
+.npc-card-delete-cancel {
   background: transparent;
-  border: 1px solid var(--color-border, #333);
-  color: var(--color-muted, #aaa);
-  border-radius: 4px;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
   cursor: pointer;
 }

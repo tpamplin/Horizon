@@ -64,18 +64,18 @@ export function CharacterLibraryPage() {
   );
 
   return (
-    <div className="character-library">
-      <header className="character-library__header">
+    <div className="char-library">
+      <header className="char-library-header">
         <h1>My Characters</h1>
-        <button className="character-library__create-btn" onClick={() => setCreateOpen(true)}>
+        <button className="char-library-create-btn" onClick={() => setCreateOpen(true)}>
           + New Character
         </button>
       </header>
 
-      {error && <p className="character-library__error" role="alert">{error}</p>}
+      {error && <p className="char-library-error" role="alert">{error}</p>}
 
       {createOpen && (
-        <div className="character-library__create-modal" role="dialog" aria-label="Create character">
+        <div className="char-library-create-modal" role="dialog" aria-label="Create character">
           <h2>Create Character</h2>
           <label>
             Name
@@ -96,24 +96,24 @@ export function CharacterLibraryPage() {
               placeholder="e.g. Warrior, Mystic, Rogue"
             />
           </label>
-          <div className="character-library__create-actions">
+          <div className="char-library-create-actions">
             <button onClick={handleCreate} disabled={submitting || !name.trim()}>
               {submitting ? 'Creating…' : 'Create'}
             </button>
-            <button className="character-library__cancel" onClick={() => setCreateOpen(false)}>
+            <button className="char-library-cancel" onClick={() => setCreateOpen(false)}>
               Cancel
             </button>
           </div>
         </div>
       )}
 
-      {loading && <p className="character-library__loading">Loading…</p>}
+      {loading && <p className="char-library-loading">Loading…</p>}
 
       {!loading && characters.length === 0 && (
-        <p className="character-library__empty">No characters yet. Create your first!</p>
+        <p className="char-library-empty">No characters yet. Create your first!</p>
       )}
 
-      <div className="character-library__grid">
+      <div className="char-library-grid">
         {characters.map((ch) => (
           <CharacterCard
             key={ch.id}
@@ -137,27 +137,27 @@ function CharacterCard({ character, onClick, onDelete }: CharacterCardProps) {
   const [confirming, setConfirming] = useState(false);
 
   return (
-    <div className="charcard" onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }} tabIndex={0} role="button">
+    <div className="char-card" onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter') onClick(); }} tabIndex={0} role="button">
       {character.portraitUrl ? (
-        <img src={character.portraitUrl} alt={character.name} className="charcard__portrait" />
+        <img src={character.portraitUrl} alt={character.name} className="char-card-portrait" />
       ) : (
-        <div className="charcard__portrait-placeholder">{character.name[0]?.toUpperCase()}</div>
+        <div className="char-card-portrait-placeholder">{character.name[0]?.toUpperCase()}</div>
       )}
-      <div className="charcard__info">
+      <div className="char-card-info">
         <h3>{character.name}</h3>
-        <p className="charcard__archetype">{character.archetype}</p>
+        <p className="char-card-archetype">{character.archetype}</p>
       </div>
-      <div className="charcard__actions">
+      <div className="char-card-actions">
         {confirming ? (
           <>
             <button
-              className="charcard__delete-confirm"
+              className="char-card-delete-confirm"
               onClick={(e) => { e.stopPropagation(); onDelete(); }}
             >
               Delete
             </button>
             <button
-              className="charcard__delete-cancel"
+              className="char-card-delete-cancel"
               onClick={(e) => { e.stopPropagation(); setConfirming(false); }}
             >
               Cancel
@@ -165,7 +165,7 @@ function CharacterCard({ character, onClick, onDelete }: CharacterCardProps) {
           </>
         ) : (
           <button
-            className="charcard__delete"
+            className="char-card-delete"
             onClick={(e) => { e.stopPropagation(); setConfirming(true); }}
             title="Delete character"
           >
