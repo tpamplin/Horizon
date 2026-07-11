@@ -30,7 +30,7 @@ Horizon stories are decomposed into subtasks that may run in parallel across mul
 
 ### Phase 1 — Fetch Context & Classify
 
-1. Fetch the story via Atlassian MCP (`getJiraIssue`) using the key below.
+1. Fetch the story via Atlassian MCP (`getJiraIssue`) using the key below. If the Atlassian MCP tools are disabled, activate them first by calling `activate_jira_issue_management`.
 2. Fetch the parent epic if linked.
 3. Read the story's acceptance criteria, scope, and work-involved sections.
 4. Read `plan/vtt-design-doc.md` for architecture decisions and `plan/implementation-plan.md` for phase-level context.
