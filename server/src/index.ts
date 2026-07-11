@@ -17,6 +17,9 @@ import { errorHandler } from './middleware/error.js';
 import { loggerOnRequest, loggerOnResponse } from './middleware/logger.js';
 import authRoutes from './routes/auth.js';
 import campaignRoutes from './routes/campaigns.js';
+import characterRoutes from './routes/characters.js';
+import npcRoutes from './routes/npcs.js';
+import uploadRoutes from './routes/upload.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -60,6 +63,15 @@ await fastify.register(authRoutes);
 
 // Campaign routes (protected — require JWT)
 await fastify.register(campaignRoutes);
+
+// Character routes (protected — require JWT)
+await fastify.register(characterRoutes);
+
+// NPC routes (protected — require JWT)
+await fastify.register(npcRoutes);
+
+// Upload routes (protected POST, public GET for serving files)
+await fastify.register(uploadRoutes);
 
 // -----------------------------------------------------------------------------
 // Health Check

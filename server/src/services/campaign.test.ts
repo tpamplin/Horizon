@@ -54,13 +54,19 @@ db.exec(`
   );
   CREATE TABLE IF NOT EXISTS characters (
     id             TEXT PRIMARY KEY,
-    campaign_id    TEXT NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
     player_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name           TEXT NOT NULL,
     archetype      TEXT NOT NULL DEFAULT '',
     portrait_url   TEXT,
     sheet_data     TEXT NOT NULL DEFAULT '{}',
     created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS campaign_characters (
+    campaign_id  TEXT NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    character_id TEXT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    added_by     TEXT NOT NULL REFERENCES users(id),
+    added_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (campaign_id, character_id)
   );
 `);
 
@@ -86,6 +92,7 @@ afterAll(() => {
 });
 
 beforeEach(() => {
+  db.exec('DELETE FROM campaign_characters');
   db.exec('DELETE FROM characters');
   db.exec('DELETE FROM campaign_players');
   db.exec('DELETE FROM campaigns');
@@ -124,16 +131,16 @@ function seedMembership(campaignId: string, userId: string, role: 'gm' | 'player
   );
 }
 
-function seedCharacter(
-  id: string,
-  campaignId: string,
-  playerUserId: string,
-  name: string,
-  archetype: string,
-) {
+function seedCharacter(id: string, playerUserId: string, name: string, archetype: string) {
   db.prepare(
-    'INSERT INTO characters (id, campaign_id, player_user_id, name, archetype) VALUES (?, ?, ?, ?, ?)',
-  ).run(id, campaignId, playerUserId, name, archetype);
+    'INSERT INTO characters (id, player_user_id, name, archetype) VALUES (?, ?, ?, ?)',
+  ).run(id, playerUserId, name, archetype);
+}
+
+function seedRoster(campaignId: string, characterId: string, addedBy: string) {
+  db.prepare(
+    'INSERT INTO campaign_characters (campaign_id, character_id, added_by) VALUES (?, ?, ?)',
+  ).run(campaignId, characterId, addedBy);
 }
 
 // =============================================================================
@@ -281,8 +288,10 @@ describe('getCampaignDetail', () => {
     seedCampaign('camp', 'gm', 'Detailed Campaign', 'DETCODE');
     seedMembership('camp', 'gm', 'gm');
     seedMembership('camp', 'player', 'player');
-    seedCharacter('char-1', 'camp', 'player', 'Hero', 'Warrior');
-    seedCharacter('char-2', 'camp', 'player', 'Sidekick', 'Rogue');
+    seedCharacter('char-1', 'player', 'Hero', 'Warrior');
+    seedCharacter('char-2', 'player', 'Sidekick', 'Rogue');
+    seedRoster('camp', 'char-1', 'player');
+    seedRoster('camp', 'char-2', 'player');
 
     const detail = getCampaignDetail('camp');
 
