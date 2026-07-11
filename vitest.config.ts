@@ -10,9 +10,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    environmentMatchGlobs: [
-      ['client/**', 'jsdom'],
-    ],
+    environmentMatchGlobs: [['client/**', 'jsdom']],
     setupFiles: ['./client/src/test-setup.ts'],
     globals: true,
   },
