@@ -6,11 +6,12 @@
 // =============================================================================
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { STAT_KEYS, getStatDef } from 'shared';
+import { STAT_KEYS, getStatDef, formatStatValue, parseStatValue, DIE_RATINGS } from 'shared';
 import type {
   Character,
   SheetData,
   StatKey,
+  DieRating,
   InventoryItem,
   SignatureItem,
   SpecialAbility,
@@ -39,10 +40,6 @@ const SAVE_DEBOUNCE_MS = 300;
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
-
-function isNumericStat(value: number | string): value is number {
-  return typeof value === 'number';
-}
 
 /** Clamp a numeric stat between 0 and 10. */
 function clampStat(value: number): number {
@@ -88,13 +85,23 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
     [onSave],
   );
 
-  // Update a single stat
+  // Update a single stat (numeric delta)
   const changeStat = (key: StatKey, delta: number) => {
     const current = sheetData.stats[key];
-    if (!isNumericStat(current)) return;
+    if (typeof current !== 'number') return;
     const updated: SheetData = {
       ...sheetData,
       stats: { ...sheetData.stats, [key]: clampStat(current + delta) },
+    };
+    setSheetData(updated);
+    scheduleSave(updated);
+  };
+
+  // Change stat die rating
+  const changeStatDie = (key: StatKey, die: DieRating) => {
+    const updated: SheetData = {
+      ...sheetData,
+      stats: { ...sheetData.stats, [key]: die },
     };
     setSheetData(updated);
     scheduleSave(updated);
@@ -110,18 +117,44 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
     scheduleSave(updated);
   };
 
-  // Tag list helpers
-  const addTag = (field: 'strengths' | 'flaws' | 'traits' | 'conditions', value: string) => {
+  // Tag list helpers (traits/conditions still use plain strings)
+  const addTag = (field: 'traits' | 'conditions', value: string) => {
     if (!value.trim()) return;
     const updated: SheetData = { ...sheetData, [field]: [...sheetData[field], value.trim()] };
     setSheetData(updated);
     scheduleSave(updated);
   };
 
-  const removeTag = (field: 'strengths' | 'flaws' | 'traits' | 'conditions', index: number) => {
+  const removeTag = (field: 'traits' | 'conditions', index: number) => {
     const updated: SheetData = {
       ...sheetData,
       [field]: sheetData[field].filter((_, i) => i !== index),
+    };
+    setSheetData(updated);
+    scheduleSave(updated);
+  };
+
+  // Rich strength/flaw helpers
+  const addRichEntry = (field: 'strengths' | 'flaws') => {
+    const updated: SheetData = {
+      ...sheetData,
+      [field]: [...(sheetData[field] as { name: string; description: string }[]), { name: '', description: '' }],
+    };
+    setSheetData(updated);
+  };
+
+  const updateRichEntry = (field: 'strengths' | 'flaws', index: number, entry: { name: string; description: string }) => {
+    const items = [...(sheetData[field] as { name: string; description: string }[])];
+    items[index] = entry;
+    const updated: SheetData = { ...sheetData, [field]: items };
+    setSheetData(updated);
+    scheduleSave(updated);
+  };
+
+  const removeRichEntry = (field: 'strengths' | 'flaws', index: number) => {
+    const updated: SheetData = {
+      ...sheetData,
+      [field]: (sheetData[field] as { name: string; description: string }[]).filter((_, i) => i !== index),
     };
     setSheetData(updated);
     scheduleSave(updated);
@@ -255,34 +288,55 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
             {STAT_KEYS.map((key: StatKey) => {
               const def = getStatDef(key);
               const value = stats[key];
-              const numVal = isNumericStat(value) ? value : 0;
+              const parsed = parseStatValue(value);
+              const isDie = parsed.format === 'die';
+              const numVal = typeof value === 'number' ? value : 0;
+              const dieVal = (parsed.format === 'die' && parsed.die) ? parsed.die : def?.defaultDie ?? 'D10';
+              const display = formatStatValue(value);
               return (
                 <div key={key} className="edit-stat-row">
                   <label className="edit-stat-label" id={`edit-stat-${key}`}>
                     {def?.name ?? key}
                   </label>
                   <div className="edit-stat-controls">
-                    <button
-                      type="button"
-                      className="stat-btn"
-                      onClick={() => changeStat(key, -1)}
-                      disabled={numVal <= 0}
-                      aria-label={`Decrease ${def?.name ?? key} from ${numVal} to ${numVal - 1}`}
-                    >
-                      −
-                    </button>
-                    <span className="edit-stat-value" aria-labelledby={`edit-stat-${key}`}>
-                      {isNumericStat(value) ? value : value}
-                    </span>
-                    <button
-                      type="button"
-                      className="stat-btn"
-                      onClick={() => changeStat(key, 1)}
-                      disabled={numVal >= 10}
-                      aria-label={`Increase ${def?.name ?? key} from ${numVal} to ${numVal + 1}`}
-                    >
-                      +
-                    </button>
+                    {isDie ? (
+                      <>
+                        <select
+                          className="edit-stat-die-select"
+                          value={dieVal}
+                          onChange={(e) => changeStatDie(key, e.target.value as DieRating)}
+                          aria-label={`Die rating for ${def?.name ?? key}`}
+                        >
+                          {DIE_RATINGS.map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                          ))}
+                        </select>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="stat-btn"
+                          onClick={() => changeStat(key, -1)}
+                          disabled={numVal <= 0}
+                          aria-label={`Decrease ${def?.name ?? key} from ${numVal} to ${numVal - 1}`}
+                        >
+                          −
+                        </button>
+                        <span className="edit-stat-value" aria-labelledby={`edit-stat-${key}`}>
+                          {display}
+                        </span>
+                        <button
+                          type="button"
+                          className="stat-btn"
+                          onClick={() => changeStat(key, 1)}
+                          disabled={numVal >= 10}
+                          aria-label={`Increase ${def?.name ?? key} from ${numVal} to ${numVal + 1}`}
+                        >
+                          +
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               );
@@ -314,24 +368,60 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
             </div>
           </section>
 
-          {/* Tag lists */}
-          {(() => {
-            const labels: Record<string, string> = {
-              strengths: 'Strengths',
-              flaws: 'Flaws',
-              traits: 'Traits',
-              conditions: 'Conditions',
-            };
-            return (['strengths', 'flaws', 'traits', 'conditions'] as const).map((field) => {
-            const items = sheetData[field];
-            const label = labels[field] ?? field;
+          {/* Strengths & Flaws (rich entries) */}
+          {(['strengths', 'flaws'] as const).map((field) => {
+            const items = (sheetData[field] as { name: string; description: string }[]);
+            const label = field === 'strengths' ? 'Strengths' : 'Flaws';
+            return (
+              <section key={field} className="edit-section" aria-label={`Edit ${label}`}>
+                <h2 className="edit-section-title">{label}</h2>
+                {items.map((entry, i) => (
+                  <div key={i} className="edit-rich-entry">
+                    <input
+                      className="edit-input"
+                      value={entry.name}
+                      onChange={(e) => updateRichEntry(field, i, { ...entry, name: e.target.value })}
+                      onBlur={onBlurSave}
+                      placeholder={`${label.slice(0, -1)} name`}
+                      aria-label={`${label.slice(0, -1)} ${i + 1} name`}
+                    />
+                    <textarea
+                      className="edit-textarea edit-textarea-sm"
+                      value={entry.description}
+                      onChange={(e) => updateRichEntry(field, i, { ...entry, description: e.target.value })}
+                      onBlur={onBlurSave}
+                      placeholder="Description…"
+                      rows={2}
+                      aria-label={`${label.slice(0, -1)} ${i + 1} description`}
+                    />
+                    <button
+                      type="button"
+                      className="item-remove-btn"
+                      onClick={() => removeRichEntry(field, i)}
+                      aria-label={`Remove ${entry.name || label.toLowerCase()}`}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                <button type="button" className="add-item-btn" onClick={() => addRichEntry(field)}>
+                  + Add {label.slice(0, -1)}
+                </button>
+              </section>
+            );
+          })}
+
+          {/* Traits & Conditions (simple tags) */}
+          {(['traits', 'conditions'] as const).map((field) => {
+            const items = sheetData[field] as string[];
+            const label = field === 'traits' ? 'Traits' : 'Conditions';
             return (
               <section key={field} className="edit-section" aria-label={`Edit ${label}`}>
                 <h2 className="edit-section-title">{label}</h2>
                 <ul className="edit-tag-list">
                   {items.map((t, i) => (
                     <li key={`${t}-${i}`} className="edit-tag-item">
-                      <span className={`tag tag-${field === 'conditions' ? 'condition' : field === 'strengths' ? 'strength' : field === 'flaws' ? 'flaw' : 'trait'}`}>
+                      <span className={`tag tag-${field === 'conditions' ? 'condition' : 'trait'}`}>
                         {t}
                       </span>
                       <button
@@ -348,8 +438,7 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
                 <TagInput onAdd={(v) => addTag(field, v)} placeholder={`Add ${label.toLowerCase()}…`} />
               </section>
             );
-          });
-          })()}
+          })}
         </div>
 
         <div className="sheet-edit-col">

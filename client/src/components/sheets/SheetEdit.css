@@ -204,6 +204,25 @@
   text-align: center;
 }
 
+.edit-stat-die-select {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  min-width: 72px;
+}
+
+.edit-stat-die-select:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--color-accent);
+}
+
 /* -----------------------------------------------------------------------------
    Adversity Tokens
    ----------------------------------------------------------------------------- */
@@ -307,6 +326,104 @@
 
 .tag-input {
   flex: 1;
+}
+
+/* ---- Rich Entry (strengths/flaws with name + description) ---- */
+
+.edit-rich-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-muted);
+  position: relative;
+}
+
+.edit-rich-entry .item-remove-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.edit-textarea-sm {
+  font-size: var(--font-size-sm);
+  min-height: 40px;
+}
+
+/* ---- SheetView Rich Trait ---- */
+
+.trait-entry-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.trait-entry {
+  margin-bottom: var(--space-xs);
+}
+
+.trait-entry-inner {
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.trait-entry-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: var(--space-xs) 0;
+  text-align: left;
+  font-family: inherit;
+}
+
+.trait-entry-toggle:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.trait-entry-toggle:hover:not(:disabled) {
+  color: var(--color-accent);
+}
+
+.trait-entry-toggle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.trait-entry-name {
+  font-weight: var(--font-weight-medium);
+}
+
+.trait-entry-chevron {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  margin-left: var(--space-sm);
+}
+
+.trait-entry-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: var(--space-xs) 0 0;
+  padding-left: var(--space-sm);
+  border-left: 2px solid var(--color-border);
+}
+
+.trait-strength .trait-entry-desc {
+  border-left-color: var(--color-success);
+}
+
+.trait-flaw .trait-entry-desc {
+  border-left-color: var(--color-warning);
 }
 
 .tag-add-btn {

@@ -10,8 +10,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCharacterStore } from '../../stores/characterStore.js';
 import { SheetEdit } from './SheetEdit.js';
-import { STAT_KEYS, getStatDef } from 'shared';
-import type { Character, StatKey, SheetData } from 'shared';
+import { STAT_KEYS, getStatDef, formatStatValue, parseStatValue } from 'shared';
+import type { Character, StatKey, SheetData, DieRating } from 'shared';
 import './SheetView.css';
 
 // -----------------------------------------------------------------------------
@@ -21,26 +21,44 @@ import './SheetView.css';
 /** Maximum stat value for progress bar scaling (numeric stats). */
 const MAX_STAT_VALUE = 10;
 
-/**
- * Label mapping from stat key to display name.
- * Fallback used when getStatDef is unavailable server-side.
- */
-/* @unused — retained as fallback for edge cases */
-// STAT_LABELS removed — using getStatDef() from shared/rules/stats instead
+/** Map die rating to fill percentage for the visual bar. */
+const DIE_FILL_PERCENT: Record<DieRating, number> = {
+  D4: 20,
+  D6: 30,
+  D8: 45,
+  D10: 60,
+  D12: 75,
+  D20: 95,
+};
 
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
 
-/** Determine if a stat value is numeric or a die string. */
-function isNumericStat(value: number | string): value is number {
-  return typeof value === 'number';
+/** Calculate the fill percentage for a stat bar (0–100). Die ratings get proportional fills. */
+function statFillPercent(value: number | string): number {
+  if (typeof value === 'string') {
+    const parsed = parseStatValue(value);
+    if (parsed.format === 'die' && parsed.die) {
+      return DIE_FILL_PERCENT[parsed.die] ?? 50;
+    }
+  }
+  if (typeof value === 'number') {
+    return Math.min(100, Math.max(0, (value / MAX_STAT_VALUE) * 100));
+  }
+  return 50;
 }
 
-/** Calculate the fill percentage for a stat bar (0–100). */
-function statFillPercent(value: number | string): number {
-  if (!isNumericStat(value)) return 50; // Die ratings get a default mid-fill
-  return Math.min(100, Math.max(0, (value / MAX_STAT_VALUE) * 100));
+/** Determine if a stat value has a numeric modifier (used for aria). */
+function statNumericValue(value: number | string): number | undefined {
+  const parsed = parseStatValue(value);
+  if (parsed.format === 'numeric' && parsed.value !== undefined) return parsed.value;
+  // Die ratings: map die to approximate numeric for aria
+  if (parsed.format === 'die' && parsed.die) {
+    const dieMap: Record<string, number> = { D4: 4, D6: 6, D8: 8, D10: 10, D12: 12, D20: 20 };
+    return dieMap[parsed.die] ?? 0;
+  }
+  return undefined;
 }
 
 // -----------------------------------------------------------------------------
@@ -67,7 +85,7 @@ export function SheetView() {
 
   // Fetch character on mount
   useEffect(() => {
-    if (campaignId && characterId) {
+    if (characterId) {
       fetchCharacter(campaignId, characterId);
     }
     // Reset edit mode when changing characters
@@ -75,11 +93,11 @@ export function SheetView() {
   }, [campaignId, characterId, fetchCharacter]);
 
   // Loading state
-  if (loading || !currentCharacter) {
+  if (loading) {
     return (
       <div className="sheet-loading" role="status" aria-label="Loading character sheet">
         <div className="spinner" />
-        <p>{loading ? 'Loading character…' : error || 'Character not found.'}</p>
+        <p>Loading character…</p>
       </div>
     );
   }
@@ -89,6 +107,18 @@ export function SheetView() {
     return (
       <div className="sheet-error" role="alert">
         <p>{error}</p>
+        <button type="button" onClick={() => navigate(-1)} className="sheet-back-btn">
+          ← Back
+        </button>
+      </div>
+    );
+  }
+
+  // Not found state
+  if (!currentCharacter) {
+    return (
+      <div className="sheet-error" role="alert">
+        <p>Character not found.</p>
         <button type="button" onClick={() => navigate(-1)} className="sheet-back-btn">
           ← Back
         </button>
@@ -161,6 +191,8 @@ export function SheetView() {
                 const statDef = getStatDef(statKey);
                 const value = stats[statKey] ?? 0;
                 const fillPercent = statFillPercent(value);
+                const displayValue = formatStatValue(value);
+                const ariaNow = statNumericValue(value);
                 return (
                   <div key={statKey} className="stat-row">
                     <label className="stat-label" id={`stat-label-${statKey}`}>
@@ -169,13 +201,14 @@ export function SheetView() {
                     <div
                       className="stat-bar"
                       role="progressbar"
-                      aria-valuenow={isNumericStat(value) ? value : undefined}
+                      aria-valuenow={ariaNow}
                       aria-valuemin={0}
-                      aria-valuemax={isNumericStat(value) ? MAX_STAT_VALUE : undefined}
+                      aria-valuemax={typeof value === 'number' ? MAX_STAT_VALUE : 20}
                       aria-labelledby={`stat-label-${statKey}`}
+                      aria-label={`${statDef?.name ?? statKey}: ${displayValue}`}
                     >
                       <div className="stat-fill" style={{ width: `${fillPercent}%` }} />
-                      <span className="stat-value">{isNumericStat(value) ? value : value}</span>
+                      <span className="stat-value">{displayValue}</span>
                     </div>
                   </div>
                 );
@@ -198,20 +231,30 @@ export function SheetView() {
               {strengths.length > 0 && (
                 <div className="strength-list">
                   <h3 className="subsection-title">Strengths</h3>
-                  <ul className="tag-list" aria-label="Strengths">
-                    {strengths.map((s) => (
-                      <li key={s} className="tag tag-strength">{s}</li>
-                    ))}
+                  <ul className="trait-entry-list" aria-label="Strengths">
+                    {strengths.map((s, i) => {
+                      const entry = typeof s === 'string' ? { name: s, description: '' } : s;
+                      return (
+                        <li key={`str-${i}`} className="trait-entry trait-strength">
+                          <RichTraitView entry={entry} />
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
               {flaws.length > 0 && (
                 <div className="flaw-list">
                   <h3 className="subsection-title">Flaws</h3>
-                  <ul className="tag-list" aria-label="Flaws">
-                    {flaws.map((f) => (
-                      <li key={f} className="tag tag-flaw">{f}</li>
-                    ))}
+                  <ul className="trait-entry-list" aria-label="Flaws">
+                    {flaws.map((f, i) => {
+                      const entry = typeof f === 'string' ? { name: f, description: '' } : f;
+                      return (
+                        <li key={`flw-${i}`} className="trait-entry trait-flaw">
+                          <RichTraitView entry={entry} />
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -360,5 +403,37 @@ export function SheetView() {
         </section>
       )}
     </article>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// RichTraitView — expandable strength/flaw entry
+// -----------------------------------------------------------------------------
+
+interface TraitEntry {
+  name: string;
+  description: string;
+}
+
+function RichTraitView({ entry }: { entry: TraitEntry }) {
+  const [open, setOpen] = useState(false);
+  const hasDesc = entry.description.length > 0;
+
+  return (
+    <div className="trait-entry-inner">
+      <button
+        type="button"
+        className="trait-entry-toggle"
+        onClick={() => hasDesc && setOpen(!open)}
+        aria-expanded={hasDesc ? open : undefined}
+        disabled={!hasDesc}
+      >
+        <span className="trait-entry-name">{entry.name}</span>
+        {hasDesc && <span className="trait-entry-chevron">{open ? '▾' : '▸'}</span>}
+      </button>
+      {open && hasDesc && (
+        <p className="trait-entry-desc">{entry.description}</p>
+      )}
+    </div>
   );
 }

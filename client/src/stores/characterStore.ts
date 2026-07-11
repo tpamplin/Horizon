@@ -26,8 +26,8 @@ export interface CharacterState {
   /** Whether the current character has unsaved local edits. */
   isDirty: boolean;
 
-  /** Fetch a single character by campaign and character ID. */
-  fetchCharacter: (campaignId: string, characterId: string) => Promise<void>;
+  /** Fetch a single character. Uses campaign-scoped endpoint when campaignId is provided, library endpoint otherwise. */
+  fetchCharacter: (campaignId: string | undefined, characterId: string) => Promise<void>;
   /** Fetch all characters for a campaign. */
   fetchCampaignCharacters: (campaignId: string) => Promise<void>;
   /** Clear all character state (e.g. on campaign switch). */
@@ -65,9 +65,11 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
   fetchCharacter: async (campaignId, characterId) => {
     set({ loading: true, error: null });
     try {
-      const character = await api.get<Character>(
-        `/api/campaigns/${campaignId}/characters/${characterId}`,
-      );
+      // Use campaign-scoped endpoint when in a campaign context, library endpoint otherwise
+      const url = campaignId
+        ? `/api/campaigns/${campaignId}/characters/${characterId}`
+        : `/api/characters/${characterId}`;
+      const character = await api.get<Character>(url);
       set({ currentCharacter: character, loading: false, isDirty: false });
     } catch (err) {
       set({
