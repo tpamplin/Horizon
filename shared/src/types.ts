@@ -390,6 +390,44 @@ export interface CharacterStats {
 }
 
 /**
+ * A defining strength or positive character trait with room for description.
+ * Replaces the old plain-string format for richer character expression.
+ *
+ * @example
+ * ```json
+ * {
+ *   "name": "Extremely Loyal",
+ *   "description": "Extremely loyal to those he considers friends. Will go to great lengths to protect them."
+ * }
+ * ```
+ */
+export interface StrengthEntry {
+  /** Short label for the strength. */
+  name: string;
+  /** Full description of the strength and how it manifests. */
+  description: string;
+}
+
+/**
+ * A defining flaw or weakness with room for description.
+ * Replaces the old plain-string format.
+ *
+ * @example
+ * ```json
+ * {
+ *   "name": "Kleptomaniac",
+ *   "description": "Generally steals to re-distribute wealth, but gets the itch if it's been too long."
+ * }
+ * ```
+ */
+export interface FlawEntry {
+  /** Short label for the flaw. */
+  name: string;
+  /** Full description of the flaw and its consequences. */
+  description: string;
+}
+
+/**
  * An item in a character's or NPC's general inventory.
  * For items with mechanical effects, see SignatureItem.
  */
@@ -508,14 +546,16 @@ export interface SheetData {
   adversityTokens: number;
   /**
    * Defining strengths and positive character traits.
-   * Freeform strings describing what the character excels at.
+   * Each entry has a short name and full description.
+   * Backward-compatible: plain strings are treated as { name: string, description: '' }.
    */
-  strengths: string[];
+  strengths: (string | StrengthEntry)[];
   /**
    * Defining flaws, weaknesses, or negative character traits.
-   * Freeform strings describing the character's shortcomings.
+   * Each entry has a short name and full description.
+   * Backward-compatible: plain strings are treated as { name: string, description: '' }.
    */
-  flaws: string[];
+  flaws: (string | FlawEntry)[];
   /**
    * General character traits (e.g. "Brave", "Clumsy").
    * For structured strengths/flaws, use the dedicated fields above.

@@ -22,6 +22,8 @@ export type {
   CampaignCharacter,
   Character,
   NPC,
+  StrengthEntry,
+  FlawEntry,
   CampaignNPC,
   CreateNPCRequest,
   UpdateNPCRequest,
@@ -57,14 +59,25 @@ export type { DiceGroup, DicePool, RollResult, DieSides, ResolveOptions } from '
 
 export { parseDicePool, resolveDiceRoll } from './rules/dice.js';
 
-export type { StatKey, StatDefinition, CheckResult, CheckOptions } from './rules/stats.js';
+export type {
+  StatKey,
+  StatDefinition,
+  CheckResult,
+  CheckOptions,
+  DieRating,
+  StatFormat,
+  ParsedStatValue,
+} from './rules/stats.js';
 
 export {
   STATS,
   STAT_KEYS,
+  DIE_RATINGS,
   DEFAULT_ADVERSITY_TOKENS,
   MIN_ADVERSITY_TOKENS,
   getStatDef,
+  formatStatValue,
+  parseStatValue,
   validateStatValue,
   awardAdversityTokens,
   deductAdversityTokens,
