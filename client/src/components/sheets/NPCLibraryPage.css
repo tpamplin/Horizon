@@ -1,0 +1,217 @@
+/* =============================================================================
+   Horizon — NPC Library Page
+   ============================================================================= */
+
+.npc-library {
+  padding: 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.npc-library__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.npc-library__header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.npc-library__create-btn {
+  background: var(--color-primary, #7c5ce7);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.npc-library__create-btn:hover {
+  opacity: 0.85;
+}
+
+.npc-library__error {
+  color: var(--color-danger, #e74c3c);
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(231, 76, 60, 0.12);
+  border-radius: 4px;
+}
+
+.npc-library__loading,
+.npc-library__empty {
+  text-align: center;
+  color: var(--color-muted, #888);
+  padding: 3rem 0;
+  font-style: italic;
+}
+
+/* ---- Create modal ---- */
+
+.npc-library__create-modal {
+  background: var(--color-surface, #1e1e2e);
+  border: 1px solid var(--color-border, #333);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.npc-library__create-modal h2 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+}
+
+.npc-library__create-modal label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-muted, #aaa);
+}
+
+.npc-library__create-modal input {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #333);
+  background: var(--color-bg, #12121a);
+  color: var(--color-text, #eee);
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.npc-library__create-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.npc-library__create-actions button {
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.npc-library__create-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.npc-library__create-actions button:first-child {
+  background: var(--color-primary, #7c5ce7);
+  color: #fff;
+}
+
+.npc-library__cancel {
+  background: transparent;
+  color: var(--color-muted, #aaa);
+  border: 1px solid var(--color-border, #333);
+}
+
+/* ---- Grid ---- */
+
+.npc-library__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* ---- Card ---- */
+
+.npcard {
+  background: var(--color-surface, #1e1e2e);
+  border: 1px solid var(--color-border, #333);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+}
+
+.npcard:hover,
+.npcard:focus-visible {
+  border-color: var(--color-primary, #7c5ce7);
+  box-shadow: 0 0 12px rgba(124, 92, 231, 0.2);
+  outline: none;
+}
+
+.npcard__portrait {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.npcard__portrait-placeholder {
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  background: var(--color-bg, #12121a);
+  color: var(--color-accent, #f0a040);
+}
+
+.npcard__info {
+  padding: 0.75rem;
+  flex: 1;
+}
+
+.npcard__info h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.npcard__archetype {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted, #888);
+}
+
+.npcard__actions {
+  padding: 0 0.75rem 0.75rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.npcard__delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.5;
+  padding: 0.2rem;
+}
+
+.npcard__delete:hover {
+  opacity: 1;
+  color: var(--color-danger, #e74c3c);
+}
+
+.npcard__delete-confirm {
+  background: var(--color-danger, #e74c3c);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.npcard__delete-cancel {
+  background: transparent;
+  border: 1px solid var(--color-border, #333);
+  color: var(--color-muted, #aaa);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}

@@ -1,0 +1,496 @@
+/* =============================================================================
+   Horizon — SheetView Styles
+   =============================================================================
+   Dark-themed, responsive character sheet layout. Uses theme.css custom
+   properties exclusively — no hardcoded colors or spacing.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Loading / Error States
+   ----------------------------------------------------------------------------- */
+
+.sheet-loading,
+.sheet-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: var(--space-xl);
+  color: var(--color-text-secondary);
+}
+
+.sheet-loading .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-surface-overlay);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: sheet-spin 0.8s linear infinite;
+  margin-bottom: var(--space-md);
+}
+
+@keyframes sheet-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sheet-error {
+  color: var(--color-error);
+}
+
+.sheet-back-btn {
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background var(--transition-fast);
+}
+
+.sheet-back-btn:hover {
+  background: var(--color-surface-raised);
+}
+
+/* -----------------------------------------------------------------------------
+   Sheet Container
+   ----------------------------------------------------------------------------- */
+
+.sheet-view {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+
+/* -----------------------------------------------------------------------------
+   Header — Portrait + Name
+   ----------------------------------------------------------------------------- */
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sheet-portrait {
+  flex-shrink: 0;
+}
+
+.portrait-img {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+}
+
+.portrait-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+.sheet-header-text {
+  min-width: 0;
+}
+
+.sheet-name {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-xs);
+  color: var(--color-text);
+  line-height: var(--line-height-tight);
+}
+
+.sheet-archetype {
+  font-size: var(--font-size-lg);
+  color: var(--color-accent);
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+}
+
+.sheet-edit-btn {
+  margin-left: auto;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sheet-edit-btn:hover {
+  background: var(--color-accent-muted);
+  border-color: var(--color-accent);
+}
+
+.sheet-edit-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* -----------------------------------------------------------------------------
+   Two-Column Body
+   ----------------------------------------------------------------------------- */
+
+.sheet-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 640px) {
+  .sheet-body {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Sections
+   ----------------------------------------------------------------------------- */
+
+.sheet-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.sheet-section-full {
+  grid-column: 1 / -1;
+}
+
+.sheet-section-gm {
+  border-color: var(--color-accent);
+  border-left: 3px solid var(--color-accent);
+}
+
+.section-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-sm);
+}
+
+.subsection-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: var(--space-sm) 0 var(--space-xs);
+}
+
+/* -----------------------------------------------------------------------------
+   Stat Bars
+   ----------------------------------------------------------------------------- */
+
+.stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.stat-label {
+  width: 90px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.stat-bar {
+  flex: 1;
+  height: 22px;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.stat-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent-muted),
+    var(--color-accent)
+  );
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-normal);
+}
+
+.stat-value {
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  line-height: 1;
+}
+
+/* -----------------------------------------------------------------------------
+   Adversity Tokens
+   ----------------------------------------------------------------------------- */
+
+.tokens-display {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+}
+
+.tokens-count {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.tokens-label {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
+/* -----------------------------------------------------------------------------
+   Tags — Traits, Strengths, Flaws, Conditions
+   ----------------------------------------------------------------------------- */
+
+.tag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.tag-strength {
+  background: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.tag-flaw {
+  background: var(--color-error-muted);
+  color: var(--color-error);
+}
+
+.tag-trait {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.tag-condition {
+  background: var(--color-warning-muted);
+  color: var(--color-warning);
+}
+
+/* -----------------------------------------------------------------------------
+   Inventory
+   ----------------------------------------------------------------------------- */
+
+.inventory-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.inventory-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border-muted);
+  font-size: var(--font-size-sm);
+}
+
+.inventory-item:last-child {
+  border-bottom: none;
+}
+
+.inv-name {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.inv-qty {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.inv-notes {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  margin-left: auto;
+}
+
+/* -----------------------------------------------------------------------------
+   Signature Items & Special Abilities
+   ----------------------------------------------------------------------------- */
+
+.sig-items-list,
+.abilities-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sig-item,
+.ability-item {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+.sig-item:last-child,
+.ability-item:last-child {
+  border-bottom: none;
+}
+
+.sig-item-name,
+.ability-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.sig-item-desc,
+.ability-effect {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 2px 0 0;
+  line-height: var(--line-height-normal);
+}
+
+.sig-item-mod {
+  font-size: var(--font-size-xs);
+  color: var(--color-success);
+  margin: 2px 0 0;
+}
+
+.sig-item-rules {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin: 2px 0 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Custom Tracks
+   ----------------------------------------------------------------------------- */
+
+.tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.track-row {
+  padding: var(--space-sm);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+}
+
+.track-name {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.track-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  margin-left: var(--space-sm);
+}
+
+.track-levels {
+  margin-top: var(--space-sm);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--color-border);
+}
+
+.track-level-item {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: 2px;
+}
+
+.track-level-num {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+  margin-right: var(--space-xs);
+}
+
+/* -----------------------------------------------------------------------------
+   Expandable Sections
+   ----------------------------------------------------------------------------- */
+
+.expand-toggle {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.expand-toggle:hover {
+  color: var(--color-text);
+}
+
+.expand-toggle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.backstory-text,
+.notes-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+  margin: var(--space-sm) 0 0;
+}
