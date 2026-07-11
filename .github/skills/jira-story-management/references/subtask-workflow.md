@@ -26,8 +26,8 @@ When calling `createJiraIssue`, the `description` must use real newline characte
 
 - **Never skip a subtask** — pick the next open subtask in order when directed to continue.
 - If a subtask is already In Progress, verify completeness. If anything is missing, finish it before moving on.
-- After implementing, run targeted tests (`npm test -w <workspace>`). Failures in changed code must be fixed before marking Done.
-- Before marking Done, post a concise Jira comment on the parent story covering changes, tests added, tests run, and follow-up risks.
+- After implementing, run targeted tests (`npm test -w <workspace>`). Failures in changed code must be fixed before marking In Review.
+- Before marking In Review, post a concise Jira comment on the parent story covering changes, tests added, tests run, and follow-up risks.
 - Proceed to the next subtask only after acceptance or explicit direction.
 - **Jira connectivity issues:** If an MCP call fails (auth/connection), stop and inform the user — do not proceed on assumptions.
 
@@ -39,7 +39,7 @@ The final subtask of every story:
 2. Run `npm run build` — zero TypeScript errors
 3. Verify Horizon conventions (no battle maps, no Tailwind, no paid APIs, no external DBs, no Redux)
 4. Post summary Jira comment on the parent story
-5. Transition story to Done (or In Review, per user preference)
+5. Transition story to **In Review** (never Done — stories require human approval)
 
 ## Horizon-Specific Subtask Patterns
 
