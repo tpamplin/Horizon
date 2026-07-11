@@ -11,7 +11,7 @@ import { Outlet, useParams, NavLink, Link } from 'react-router-dom';
 import { api } from '../../api/client.js';
 import { useAuthStore } from '../../stores/authStore.js';
 import { BackgroundLayer } from '../background/BackgroundLayer.js';
-import type { CampaignDetailResponse } from 'shared';
+import type { CampaignDetailResponse, NPC } from 'shared';
 import './CampaignLayout.css';
 
 // -----------------------------------------------------------------------------
@@ -37,6 +37,7 @@ export function CampaignLayout() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [campaignNPCs, setCampaignNPCs] = useState<NPC[]>([]);
 
   // Fetch campaign detail on mount
   useEffect(() => {
@@ -47,9 +48,13 @@ export function CampaignLayout() {
     async function fetchDetail() {
       try {
         setLoading(true);
-        const data = await api.get<CampaignDetailResponse>(`/api/campaigns/${id}`);
+        const [data, npcs] = await Promise.all([
+          api.get<CampaignDetailResponse>(`/api/campaigns/${id}`),
+          api.get<NPC[]>(`/api/campaigns/${id}/npcs`).catch(() => [] as NPC[]),
+        ]);
         if (!cancelled) {
           setDetail(data);
+          setCampaignNPCs(npcs);
           setError(null);
         }
       } catch (err) {
@@ -128,7 +133,40 @@ export function CampaignLayout() {
         </nav>
 
         <footer className="sidebar-footer">
-          <div className="sidebar-players">
+          {(detail.characters?.length ?? 0) > 0 && (
+            <div className="sidebar-characters">
+              <span className="sidebar-section-title">Characters</span>
+              {detail.characters?.map((c) => (
+                <Link
+                  key={c.id}
+                  to={`/campaigns/${id}/characters/${c.id}`}
+                  className="character-link"
+                >
+                  {c.name}
+                  <span className="character-archetype">{c.archetype}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+          {campaignNPCs.length > 0 && (
+            <div className="sidebar-characters">
+              <span className="sidebar-section-title">NPCs</span>
+              {campaignNPCs.map((n) => (
+                <Link
+                  key={n.id}
+                  to={`/npcs/${n.id}`}
+                  className="character-link"
+                >
+                  {n.name}
+                  <span className="character-archetype">{n.archetype}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+          <div className="sidebar-section-title" style={{ marginTop: '0.75rem' }}>Library</div>
+          <Link to="/characters" className="character-link">📋 Character Library</Link>
+          <Link to="/npcs" className="character-link">👤 NPC Library</Link>
+          <div className="sidebar-players" style={{ marginTop: '0.75rem' }}>
             <span className="sidebar-section-title">Players</span>
             {detail.players?.map((p) => (
               <div key={p.userId} className="player-item">

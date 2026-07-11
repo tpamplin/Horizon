@@ -195,6 +195,39 @@
   text-overflow: ellipsis;
 }
 
+/* Footer — Character List */
+
+.sidebar-characters {
+  margin-bottom: 0.75rem;
+}
+
+.character-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.character-link:hover {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+}
+
+.character-link:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.character-archetype {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 /* Footer — Player List */
 
 .sidebar-footer {

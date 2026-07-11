@@ -5,6 +5,9 @@ import { LoginPage } from './components/auth/LoginPage.js';
 import { AuthGuard } from './components/auth/AuthGuard.js';
 import { CampaignListPage } from './components/campaigns/CampaignListPage.js';
 import { CampaignLayout } from './components/campaigns/CampaignLayout.js';
+import { SheetView } from './components/sheets/SheetView.js';
+import { CharacterLibraryPage } from './components/sheets/CharacterLibraryPage.js';
+import { NPCLibraryPage } from './components/sheets/NPCLibraryPage.js';
 import { useAuthStore } from './stores/authStore.js';
 
 function HomePage() {
@@ -51,6 +54,36 @@ function HomePage() {
           >
             My Campaigns
           </Link>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <Link
+              to="/characters"
+              style={{
+                padding: '0.5rem 1.25rem',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                color: 'var(--color-text)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '6px',
+                textDecoration: 'none',
+              }}
+            >
+              My Characters
+            </Link>
+            <Link
+              to="/npcs"
+              style={{
+                padding: '0.5rem 1.25rem',
+                fontSize: '0.9rem',
+                fontWeight: 500,
+                color: 'var(--color-text)',
+                border: '1px solid var(--color-border)',
+                borderRadius: '6px',
+                textDecoration: 'none',
+              }}
+            >
+              My NPCs
+            </Link>
+          </div>
           <button
             type="button"
             onClick={logout}
@@ -149,7 +182,46 @@ export function App() {
           <Route path="chat" element={<PlaceholderPage title="Chat" />} />
           <Route path="backgrounds" element={<PlaceholderPage title="Backgrounds" />} />
         </Route>
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/campaigns/:campaignId/characters/:characterId"
+          element={
+            <AuthGuard>
+              <SheetView />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/characters"
+          element={
+            <AuthGuard>
+              <CharacterLibraryPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/characters/:characterId"
+          element={
+            <AuthGuard>
+              <SheetView />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/npcs"
+          element={
+            <AuthGuard>
+              <NPCLibraryPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/npcs/:npcId"
+          element={
+            <AuthGuard>
+              <PlaceholderPage title="NPC Viewer" />
+            </AuthGuard>
+          }
+        />\n        <Route path="/" element={<HomePage />} />
       </Routes>
     </BrowserRouter>
   );
