@@ -30,9 +30,16 @@ import type {
 // Constants
 // -----------------------------------------------------------------------------
 
-/** Default empty sheet data applied when no initial data is provided. */
+/** Default empty sheet data applied when no initial data is provided. Stats use die-rating format. */
 export const DEFAULT_SHEET_DATA: SheetData = {
-  stats: { cognition: 0, force: 0, reflex: 0, conflict: 0, influence: 0, stability: 0 },
+  stats: {
+    cognition: 'D10',
+    force: 'D6',
+    reflex: 'D12',
+    conflict: 'D8',
+    influence: 'D20',
+    stability: 'D4',
+  },
   adversityTokens: 0,
   strengths: [],
   flaws: [],
