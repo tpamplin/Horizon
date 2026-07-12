@@ -15,9 +15,13 @@ import type {
   InventoryItem,
   SignatureItem,
   SpecialAbility,
+  TrackModifier,
 } from 'shared';
 import type { SaveState } from '../../stores/characterStore.js';
+import type { SignatureItemTemplate } from 'shared';
+import { api } from '../../api/client.js';
 import { PortraitUpload } from './PortraitUpload.js';
+import { PickFromAbilityLibrary } from './PickFromAbilityLibrary.js';
 import './SheetEdit.css';
 
 // -----------------------------------------------------------------------------
@@ -33,8 +37,6 @@ export interface SheetEditProps {
   onDone: () => void;
 }
 
-/** Debounce timer for save-on-blur. */
-let saveTimer: ReturnType<typeof setTimeout> | null = null;
 const SAVE_DEBOUNCE_MS = 300;
 
 // -----------------------------------------------------------------------------
@@ -47,6 +49,187 @@ function clampStat(value: number): number {
 }
 
 // -----------------------------------------------------------------------------
+// PickFromLibrary — modal to select items from template library
+// -----------------------------------------------------------------------------
+
+function PickFromLibrary({ onPick }: { onPick: (template: SignatureItemTemplate) => void }) {
+  const [open, setOpen] = useState(false);
+  const [templates, setTemplates] = useState<SignatureItemTemplate[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  const close = useCallback(() => {
+    setOpen(false);
+    // Return focus to trigger
+    triggerRef.current?.focus();
+  }, []);
+
+  const openPicker = async () => {
+    setOpen(true);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.get<SignatureItemTemplate[]>('/api/items/templates');
+      setTemplates(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load item templates.';
+      setError(message);
+      console.error('PickFromLibrary:', message);
+    }
+    finally { setLoading(false); }
+  };
+
+  // Focus trap + Escape handler
+  useEffect(() => {
+    if (!open) return;
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    // Focus first focusable element after render
+    const timer = setTimeout(() => {
+      const first = modal.querySelector<HTMLElement>(focusableSelector);
+      first?.focus();
+    }, 50);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key === 'Tab') {
+        const focusable = Array.from(modal.querySelectorAll<HTMLElement>(focusableSelector));
+        if (focusable.length === 0) return;
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open, close, focusableSelector]);
+
+  return (
+    <>
+      <button type="button" className="add-item-btn pick-lib-btn" onClick={openPicker} ref={triggerRef}>
+        📋 Pick from Library
+      </button>
+      {open && (
+        <div className="pick-library-overlay" role="dialog" aria-label="Pick signature item from library" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) close(); }} ref={modalRef}>
+          <div className="pick-library-modal">
+            <h2>Pick from Library</h2>
+            {loading && <p className="loading-msg">Loading…</p>}
+            {error && <p className="pick-library-error" role="alert">{error}</p>}
+            {!loading && !error && (
+            <div className="pick-library-grid">
+              {templates.map(t => (
+                <div key={t.id} className="pick-item-card" onClick={() => { onPick(t); close(); }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(t); close(); } }}>
+                  <h4>{t.name}</h4>
+                  <p>{t.description.slice(0, 80)}{t.description.length > 80 ? '…' : ''}</p>
+                  {t.category && <span className="tmpl-badge">{t.category}</span>}
+                </div>
+              ))}
+            </div>
+            )}
+            <button className="pick-close" onClick={close}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// -----------------------------------------------------------------------------
+// StatModAddMenu — dropdown to add stat modifier to a track level
+// -----------------------------------------------------------------------------
+
+function StatModAddMenu({
+  existingStatKeys,
+  onAdd,
+}: {
+  existingStatKeys: string[];
+  onAdd: (statKey: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const available = STAT_KEYS.filter((k) => !existingStatKeys.includes(k));
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        wrapperRef.current?.querySelector<HTMLElement>('button')?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [open]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  if (available.length === 0) return null;
+
+  return (
+    <div className="stat-mod-add-wrapper" ref={wrapperRef}>
+      <button type="button" className="add-item-btn add-stat-mod-btn" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="listbox">
+        + Add Stat Modifier
+      </button>
+      {open && (
+        <div className="stat-mod-add-menu" role="listbox" aria-label="Available stats">
+          {available.map((key) => {
+            const def = getStatDef(key);
+            return (
+              <button
+                key={key}
+                type="button"
+                className="stat-mod-add-option"
+                role="option"
+                onClick={() => { onAdd(key); setOpen(false); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onAdd(key);
+                    setOpen(false);
+                  }
+                }}
+              >
+                {def?.name ?? key}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -----------------------------------------------------------------------------
 // Component
 // -----------------------------------------------------------------------------
 
@@ -56,6 +239,7 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
   );
   const [saveMsg, setSaveMsg] = useState<string>('');
   const editRef = useRef<HTMLDivElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Focus the first input on mount
   useEffect(() => {
@@ -76,10 +260,10 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
   // Debounced save
   const scheduleSave = useCallback(
     (updated: SheetData) => {
-      if (saveTimer) clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
         onSave(updated);
-        saveTimer = null;
+        saveTimerRef.current = null;
       }, SAVE_DEBOUNCE_MS);
     },
     [onSave],
@@ -97,11 +281,14 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
     scheduleSave(updated);
   };
 
-  // Change stat die rating
-  const changeStatDie = (key: StatKey, die: DieRating) => {
+  // Change stat die rating with optional modifier
+  const changeStatDie = (key: StatKey, die: DieRating, modifier?: number) => {
+    const value = modifier && modifier !== 0
+      ? `${die}${modifier > 0 ? '+' : ''}${modifier}`
+      : die;
     const updated: SheetData = {
       ...sheetData,
-      stats: { ...sheetData.stats, [key]: die },
+      stats: { ...sheetData.stats, [key]: value },
     };
     setSheetData(updated);
     scheduleSave(updated);
@@ -135,16 +322,25 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
   };
 
   // Rich strength/flaw helpers
+
+  /** Normalize legacy string entries to { name, description } objects. */
+  const normalizeRichEntries = (field: 'strengths' | 'flaws'): { name: string; description: string }[] => {
+    return (sheetData[field] as (string | { name: string; description: string })[]).map((entry) =>
+      typeof entry === 'string' ? { name: entry, description: '' } : entry,
+    );
+  };
+
   const addRichEntry = (field: 'strengths' | 'flaws') => {
+    const items = normalizeRichEntries(field);
     const updated: SheetData = {
       ...sheetData,
-      [field]: [...(sheetData[field] as { name: string; description: string }[]), { name: '', description: '' }],
+      [field]: [...items, { name: '', description: '' }],
     };
     setSheetData(updated);
   };
 
   const updateRichEntry = (field: 'strengths' | 'flaws', index: number, entry: { name: string; description: string }) => {
-    const items = [...(sheetData[field] as { name: string; description: string }[])];
+    const items = normalizeRichEntries(field);
     items[index] = entry;
     const updated: SheetData = { ...sheetData, [field]: items };
     setSheetData(updated);
@@ -152,9 +348,10 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
   };
 
   const removeRichEntry = (field: 'strengths' | 'flaws', index: number) => {
+    const items = normalizeRichEntries(field);
     const updated: SheetData = {
       ...sheetData,
-      [field]: (sheetData[field] as { name: string; description: string }[]).filter((_, i) => i !== index),
+      [field]: items.filter((_, i) => i !== index),
     };
     setSheetData(updated);
     scheduleSave(updated);
@@ -247,9 +444,67 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
     scheduleSave(updated);
   };
 
+  const addTrackLevel = (trackIndex: number) => {
+    const tracks = [...sheetData.customTracks];
+    const track = { ...tracks[trackIndex]! };
+    const levels = [...(track.levels ?? [])];
+    const nextLevel = levels.length > 0 ? Math.max(...levels.map((l) => l.atLevel)) + 1 : 0;
+    levels.push({ atLevel: nextLevel, description: '' });
+    track.levels = levels;
+    tracks[trackIndex] = track;
+    const updated: SheetData = { ...sheetData, customTracks: tracks };
+    setSheetData(updated);
+    scheduleSave(updated);
+  };
+
+  const updateTrackLevel = (trackIndex: number, levelIndex: number, level: TrackModifier) => {
+    const tracks = [...sheetData.customTracks];
+    const track = { ...tracks[trackIndex]! };
+    const levels = [...(track.levels ?? [])];
+    levels[levelIndex] = level;
+    track.levels = levels;
+    tracks[trackIndex] = track;
+    const updated: SheetData = { ...sheetData, customTracks: tracks };
+    setSheetData(updated);
+    scheduleSave(updated);
+  };
+
+  const removeTrackLevel = (trackIndex: number, levelIndex: number) => {
+    const tracks = [...sheetData.customTracks];
+    const track = { ...tracks[trackIndex]! };
+    const levels = [...(track.levels ?? [])];
+    track.levels = levels.filter((_, i) => i !== levelIndex);
+    tracks[trackIndex] = track;
+    const updated: SheetData = { ...sheetData, customTracks: tracks };
+    setSheetData(updated);
+    scheduleSave(updated);
+  };
+
+  const updateTrackLevelStatMod = (
+    trackIndex: number, levelIndex: number, statKey: string, value: number | undefined,
+  ) => {
+    const tracks = [...sheetData.customTracks];
+    const track = { ...tracks[trackIndex]! };
+    const levels = [...(track.levels ?? [])];
+    const level = { ...levels[levelIndex]! };
+    const mods = { ...(level.statModifiers ?? {}) };
+    if (value === undefined || isNaN(value)) {
+      delete mods[statKey];
+    } else {
+      mods[statKey] = value;
+    }
+    level.statModifiers = Object.keys(mods).length > 0 ? mods : undefined;
+    levels[levelIndex] = level;
+    track.levels = levels;
+    tracks[trackIndex] = track;
+    const updated: SheetData = { ...sheetData, customTracks: tracks };
+    setSheetData(updated);
+    scheduleSave(updated);
+  };
+
   // Blur handler for text fields
   const onBlurSave = useCallback(() => {
-    if (saveTimer) clearTimeout(saveTimer);
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     onSave(sheetData);
   }, [sheetData, onSave]);
 
@@ -282,9 +537,9 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
 
       <div className="sheet-edit-body">
         <div className="sheet-edit-col">
-          {/* Stats */}
-          <section className="edit-section" aria-label="Edit character stats">
-            <h2 className="edit-section-title">Stats</h2>
+          {/* Attributes */}
+          <section className="edit-section" aria-label="Edit character attributes">
+            <h2 className="edit-section-title">Attributes</h2>
             {STAT_KEYS.map((key: StatKey) => {
               const def = getStatDef(key);
               const value = stats[key];
@@ -292,6 +547,7 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
               const isDie = parsed.format === 'die';
               const numVal = typeof value === 'number' ? value : 0;
               const dieVal = (parsed.format === 'die' && parsed.die) ? parsed.die : def?.defaultDie ?? 'D10';
+              const dieModifier = (parsed.format === 'die') ? parsed.modifier : undefined;
               const display = formatStatValue(value);
               return (
                 <div key={key} className="edit-stat-row">
@@ -304,13 +560,25 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
                         <select
                           className="edit-stat-die-select"
                           value={dieVal}
-                          onChange={(e) => changeStatDie(key, e.target.value as DieRating)}
+                          onChange={(e) => changeStatDie(key, e.target.value as DieRating, dieModifier)}
                           aria-label={`Die rating for ${def?.name ?? key}`}
                         >
                           {DIE_RATINGS.map((d) => (
                             <option key={d} value={d}>{d}</option>
                           ))}
                         </select>
+                        <input
+                          type="number"
+                          className="edit-stat-modifier"
+                          value={dieModifier ?? ''}
+                          placeholder="+0"
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            const mod = raw === '' || raw === '-' ? undefined : parseInt(raw, 10);
+                            changeStatDie(key, dieVal, isNaN(mod as number) ? undefined : mod);
+                          }}
+                          aria-label={`Modifier for ${def?.name ?? key}`}
+                        />
                       </>
                     ) : (
                       <>
@@ -370,7 +638,7 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
 
           {/* Strengths & Flaws (rich entries) */}
           {(['strengths', 'flaws'] as const).map((field) => {
-            const items = (sheetData[field] as { name: string; description: string }[]);
+            const items = normalizeRichEntries(field);
             const label = field === 'strengths' ? 'Strengths' : 'Flaws';
             return (
               <section key={field} className="edit-section" aria-label={`Edit ${label}`}>
@@ -539,6 +807,22 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
             <button type="button" className="add-item-btn" onClick={addSigItem}>
               + Add Signature Item
             </button>
+            <PickFromLibrary
+              onPick={(template) => {
+                const updated: SheetData = {
+                  ...sheetData,
+                  signatureItems: [...sheetData.signatureItems, {
+                    name: template.name,
+                    description: template.description,
+                    modifiers: template.modifiers,
+                    rules: template.rules,
+                    templateId: template.id,
+                  }],
+                };
+                setSheetData(updated);
+                scheduleSave(updated);
+              }}
+            />
           </section>
 
           {/* Special Abilities */}
@@ -576,6 +860,20 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
             <button type="button" className="add-item-btn" onClick={addAbility}>
               + Add Ability
             </button>
+            <PickFromAbilityLibrary
+              onPick={(template) => {
+                const updated: SheetData = {
+                  ...sheetData,
+                  specialAbilities: [...sheetData.specialAbilities, {
+                    name: template.name,
+                    effect: template.effect,
+                    templateId: template.id,
+                  }],
+                };
+                setSheetData(updated);
+                scheduleSave(updated);
+              }}
+            />
           </section>
 
           {/* Custom Tracks */}
@@ -584,26 +882,117 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
               <h2 className="edit-section-title">Custom Tracks</h2>
               {customTracks.map((track, i) => (
                 <div key={i} className="edit-track-row">
-                  <span className="edit-track-name">{track.name}</span>
-                  <div className="edit-track-controls">
+                  <div className="edit-track-header">
+                    <span className="edit-track-name">{track.name}</span>
+                    <div className="edit-track-controls">
+                      <button
+                        type="button"
+                        className="stat-btn"
+                        onClick={() => updateTrackValue(i, -1)}
+                        disabled={track.current <= track.min}
+                        aria-label={`Decrease ${track.name} from ${track.current}`}
+                      >
+                        −
+                      </button>
+                      <span className="edit-track-value">{track.current} / {track.max}</span>
+                      <button
+                        type="button"
+                        className="stat-btn"
+                        onClick={() => updateTrackValue(i, 1)}
+                        disabled={track.current >= track.max}
+                        aria-label={`Increase ${track.name} from ${track.current}`}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Track Level Editing */}
+                  <div className="edit-track-levels">
+                    {(track.levels ?? []).map((level, li) => (
+                      <div key={li} className="edit-track-level-item">
+                        <div className="edit-track-level-header">
+                          <label className="edit-track-level-label">
+                            Level
+                            <input
+                              type="number"
+                              className="edit-input edit-level-num"
+                              value={level.atLevel}
+                              onChange={(e) => updateTrackLevel(i, li, {
+                                ...level,
+                                atLevel: Math.max(0, Number(e.target.value) || 0),
+                              })}
+                              onBlur={onBlurSave}
+                              min={0}
+                              aria-label={`Level ${li + 1} threshold for ${track.name}`}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            className="item-remove-btn"
+                            onClick={() => removeTrackLevel(i, li)}
+                            aria-label={`Remove level ${level.atLevel} from ${track.name}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <textarea
+                          className="edit-textarea edit-textarea-sm"
+                          value={level.description}
+                          onChange={(e) => updateTrackLevel(i, li, {
+                            ...level,
+                            description: e.target.value,
+                          })}
+                          onBlur={onBlurSave}
+                          placeholder="Level description…"
+                          rows={2}
+                          aria-label={`Level ${level.atLevel} description for ${track.name}`}
+                        />
+
+                        {/* Stat Modifiers for this level */}
+                        <div className="edit-level-stat-mods">
+                          <span className="edit-level-stat-mods-label">Stat modifiers:</span>
+                          {Object.entries(level.statModifiers ?? {}).map(([statKey, val]) => (
+                            <div key={statKey} className="edit-level-stat-mod-row">
+                              <label className="edit-level-stat-mod-key">
+                                {getStatDef(statKey as StatKey)?.name ?? statKey}
+                              </label>
+                              <input
+                                type="number"
+                                className="edit-input edit-stat-mod-input"
+                                value={val}
+                                onChange={(e) => {
+                                  const raw = e.target.value;
+                                  const num = raw === '' || raw === '-' ? undefined : parseInt(raw, 10);
+                                  updateTrackLevelStatMod(i, li, statKey, num as number | undefined);
+                                }}
+                                onBlur={onBlurSave}
+                                placeholder="0"
+                                aria-label={`${getStatDef(statKey as StatKey)?.name ?? statKey} modifier at level ${level.atLevel}`}
+                              />
+                              <button
+                                type="button"
+                                className="tag-remove-btn"
+                                onClick={() => updateTrackLevelStatMod(i, li, statKey, undefined)}
+                                aria-label={`Remove ${statKey} modifier from level ${level.atLevel}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                          <StatModAddMenu
+                            existingStatKeys={Object.keys(level.statModifiers ?? {})}
+                            onAdd={(statKey) => updateTrackLevelStatMod(i, li, statKey, 0)}
+                          />
+                        </div>
+                      </div>
+                    ))}
                     <button
                       type="button"
-                      className="stat-btn"
-                      onClick={() => updateTrackValue(i, -1)}
-                      disabled={track.current <= track.min}
-                      aria-label={`Decrease ${track.name} from ${track.current}`}
+                      className="add-item-btn"
+                      onClick={() => addTrackLevel(i)}
                     >
-                      −
-                    </button>
-                    <span className="edit-track-value">{track.current} / {track.max}</span>
-                    <button
-                      type="button"
-                      className="stat-btn"
-                      onClick={() => updateTrackValue(i, 1)}
-                      disabled={track.current >= track.max}
-                      aria-label={`Increase ${track.name} from ${track.current}`}
-                    >
-                      +
+                      + Add Level
                     </button>
                   </div>
                 </div>
@@ -706,3 +1095,4 @@ function TagInput({ onAdd, placeholder }: { onAdd: (value: string) => void; plac
     </div>
   );
 }
+

@@ -148,6 +148,25 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* Mobile: stack header vertically */
+@media (max-width: 480px) {
+  .sheet-header {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: center;
+  }
+
+  .sheet-header-text {
+    text-align: center;
+    width: 100%;
+  }
+
+  .sheet-edit-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
 /* -----------------------------------------------------------------------------
    Two-Column Body
    ----------------------------------------------------------------------------- */
@@ -204,59 +223,47 @@
 }
 
 /* -----------------------------------------------------------------------------
-   Stat Bars
+   Attribute Grid — die cards replacing stat bars
    ----------------------------------------------------------------------------- */
 
-.stat-list {
+.attr-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+@media (min-width: 500px) {
+  .attr-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.attr-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.stat-row {
-  display: flex;
   align-items: center;
-  gap: var(--space-sm);
-}
-
-.stat-label {
-  width: 90px;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.stat-bar {
-  flex: 1;
-  height: 22px;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-xs);
   background: var(--color-surface-raised);
-  border-radius: var(--radius-sm);
-  position: relative;
-  overflow: hidden;
-  min-width: 60px;
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  text-align: center;
 }
 
-.stat-fill {
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--color-accent-muted),
-    var(--color-accent)
-  );
-  border-radius: var(--radius-sm);
-  transition: width var(--transition-normal);
-}
-
-.stat-value {
-  position: absolute;
-  right: var(--space-sm);
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
+.attr-die {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
   line-height: 1;
+}
+
+.attr-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
 }
 
 /* -----------------------------------------------------------------------------
@@ -401,6 +408,14 @@
   line-height: var(--line-height-normal);
 }
 
+.lib-badge {
+  display: inline-block;
+  margin-left: var(--space-xs);
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+  cursor: help;
+}
+
 .sig-item-mod {
   font-size: var(--font-size-xs);
   color: var(--color-success);
@@ -457,6 +472,20 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-accent);
   margin-right: var(--space-xs);
+}
+
+/* Mobile: track row wrapping */
+@media (max-width: 480px) {
+  .track-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .track-levels {
+    margin-left: 0;
+    padding-left: var(--space-xs);
+  }
 }
 
 /* -----------------------------------------------------------------------------

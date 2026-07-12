@@ -223,6 +223,24 @@
   border-color: var(--color-accent);
 }
 
+.edit-stat-modifier {
+  width: 52px;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.edit-stat-modifier:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--color-accent);
+}
+
 /* -----------------------------------------------------------------------------
    Adversity Tokens
    ----------------------------------------------------------------------------- */
@@ -628,4 +646,258 @@
 .sheet-edit-bottom {
   grid-column: 1 / -1;
   margin-top: var(--space-md);
+}
+
+/* -----------------------------------------------------------------------------
+   Track Level Editing
+   ----------------------------------------------------------------------------- */
+
+.edit-track-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: var(--space-sm);
+}
+
+.edit-track-levels {
+  margin-left: var(--space-md);
+  padding-left: var(--space-sm);
+  border-left: 2px solid var(--color-border);
+}
+
+.edit-track-level-item {
+  margin-bottom: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+
+.edit-track-level-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.edit-track-level-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.edit-level-num {
+  width: 52px;
+  text-align: center;
+}
+
+/* ---- Level Stat Modifiers ---- */
+
+.edit-level-stat-mods {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-border-muted);
+}
+
+.edit-level-stat-mods-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.edit-level-stat-mod-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.edit-level-stat-mod-key {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  min-width: 80px;
+  text-transform: capitalize;
+}
+
+.edit-stat-mod-input {
+  width: 60px;
+  text-align: center;
+}
+
+/* ---- Stat Mod Add Menu ---- */
+
+.stat-mod-add-wrapper {
+  position: relative;
+  margin-top: var(--space-xs);
+}
+
+.add-stat-mod-btn {
+  font-size: var(--font-size-xs);
+}
+
+.stat-mod-add-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 160px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.stat-mod-add-option {
+  display: block;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.stat-mod-add-option:hover {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* ---- Library Picker ---- */
+
+.pick-lib-btn {
+  width: auto;
+  font-size: var(--font-size-xs);
+}
+
+.pick-library-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: var(--space-md);
+}
+
+.pick-library-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.pick-library-modal h2 {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-md);
+  color: var(--color-text);
+}
+
+.pick-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.pick-item-card {
+  padding: var(--space-sm);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.pick-item-card:hover,
+.pick-item-card:focus-visible {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted);
+}
+
+.pick-item-card h4 {
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-xs);
+  color: var(--color-text);
+}
+
+.pick-item-card p {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.pick-close {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pick-close:hover {
+  background: var(--color-surface-overlay);
+}
+
+.pick-library-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--space-md);
+}
+
+.tmpl-badge {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  padding: 1px var(--space-xs);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+}
+
+.loading-msg {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-lg);
+  font-size: var(--font-size-sm);
+}
+
+/* Mobile: Pick from Library modal */
+@media (max-width: 480px) {
+  .pick-library-overlay {
+    padding: var(--space-sm);
+    align-items: flex-start;
+  }
+
+  .pick-library-modal {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+
+  .pick-library-grid {
+    grid-template-columns: 1fr;
+  }
 }

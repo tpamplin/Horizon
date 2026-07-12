@@ -10,56 +10,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCharacterStore } from '../../stores/characterStore.js';
 import { SheetEdit } from './SheetEdit.js';
-import { STAT_KEYS, getStatDef, formatStatValue, parseStatValue } from 'shared';
-import type { Character, StatKey, SheetData, DieRating } from 'shared';
+import { STAT_KEYS, getStatDef, formatStatValue } from 'shared';
+import type { Character, StatKey, SheetData } from 'shared';
 import './SheetView.css';
-
-// -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-/** Maximum stat value for progress bar scaling (numeric stats). */
-const MAX_STAT_VALUE = 10;
-
-/** Map die rating to fill percentage for the visual bar. */
-const DIE_FILL_PERCENT: Record<DieRating, number> = {
-  D4: 20,
-  D6: 30,
-  D8: 45,
-  D10: 60,
-  D12: 75,
-  D20: 95,
-};
-
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-/** Calculate the fill percentage for a stat bar (0–100). Die ratings get proportional fills. */
-function statFillPercent(value: number | string): number {
-  if (typeof value === 'string') {
-    const parsed = parseStatValue(value);
-    if (parsed.format === 'die' && parsed.die) {
-      return DIE_FILL_PERCENT[parsed.die] ?? 50;
-    }
-  }
-  if (typeof value === 'number') {
-    return Math.min(100, Math.max(0, (value / MAX_STAT_VALUE) * 100));
-  }
-  return 50;
-}
-
-/** Determine if a stat value has a numeric modifier (used for aria). */
-function statNumericValue(value: number | string): number | undefined {
-  const parsed = parseStatValue(value);
-  if (parsed.format === 'numeric' && parsed.value !== undefined) return parsed.value;
-  // Die ratings: map die to approximate numeric for aria
-  if (parsed.format === 'die' && parsed.die) {
-    const dieMap: Record<string, number> = { D4: 4, D6: 6, D8: 8, D10: 10, D12: 12, D20: 20 };
-    return dieMap[parsed.die] ?? 0;
-  }
-  return undefined;
-}
 
 // -----------------------------------------------------------------------------
 // Component
@@ -183,33 +136,18 @@ export function SheetView() {
         {/* ---- Left Column ---- */}
         <div className="sheet-col">
 
-          {/* Stats */}
-          <section className="sheet-section" aria-label="Character stats">
-            <h2 className="section-title">Stats</h2>
-            <div className="stat-list">
+          {/* Attributes */}
+          <section className="sheet-section" aria-label="Character attributes">
+            <h2 className="section-title">Attributes</h2>
+            <div className="attr-grid">
               {STAT_KEYS.map((statKey: StatKey) => {
                 const statDef = getStatDef(statKey);
                 const value = stats[statKey] ?? 0;
-                const fillPercent = statFillPercent(value);
                 const displayValue = formatStatValue(value);
-                const ariaNow = statNumericValue(value);
                 return (
-                  <div key={statKey} className="stat-row">
-                    <label className="stat-label" id={`stat-label-${statKey}`}>
-                      {statDef?.name ?? statKey}
-                    </label>
-                    <div
-                      className="stat-bar"
-                      role="progressbar"
-                      aria-valuenow={ariaNow}
-                      aria-valuemin={0}
-                      aria-valuemax={typeof value === 'number' ? MAX_STAT_VALUE : 20}
-                      aria-labelledby={`stat-label-${statKey}`}
-                      aria-label={`${statDef?.name ?? statKey}: ${displayValue}`}
-                    >
-                      <div className="stat-fill" style={{ width: `${fillPercent}%` }} />
-                      <span className="stat-value">{displayValue}</span>
-                    </div>
+                  <div key={statKey} className="attr-card">
+                    <span className="attr-die">{displayValue}</span>
+                    <span className="attr-label">{statDef?.name ?? statKey}</span>
                   </div>
                 );
               })}
@@ -313,7 +251,10 @@ export function SheetView() {
               <ul className="sig-items-list" aria-label="Signature items">
                 {signatureItems.map((item, i) => (
                   <li key={`${item.name}-${i}`} className="sig-item">
-                    <strong className="sig-item-name">{item.name}</strong>
+                    <strong className="sig-item-name">
+                      {item.name}
+                      {item.templateId && <span className="lib-badge" title="From Library">📋</span>}
+                    </strong>
                     <p className="sig-item-desc">{item.description}</p>
                     {item.modifiers && <p className="sig-item-mod"><em>{item.modifiers}</em></p>}
                     {item.rules && <p className="sig-item-rules">{item.rules}</p>}
@@ -330,7 +271,10 @@ export function SheetView() {
               <ul className="abilities-list" aria-label="Special abilities">
                 {specialAbilities.map((ab, i) => (
                   <li key={`${ab.name}-${i}`} className="ability-item">
-                    <strong className="ability-name">{ab.name}</strong>
+                    <strong className="ability-name">
+                      {ab.name}
+                      {ab.templateId && <span className="lib-badge" title="From Library">📋</span>}
+                    </strong>
                     <p className="ability-effect">{ab.effect}</p>
                   </li>
                 ))}
@@ -410,12 +354,12 @@ export function SheetView() {
 // RichTraitView — expandable strength/flaw entry
 // -----------------------------------------------------------------------------
 
-interface TraitEntry {
+export interface TraitEntry {
   name: string;
   description: string;
 }
 
-function RichTraitView({ entry }: { entry: TraitEntry }) {
+export function RichTraitView({ entry }: { entry: TraitEntry }) {
   const [open, setOpen] = useState(false);
   const hasDesc = entry.description.length > 0;
 
