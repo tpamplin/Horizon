@@ -464,6 +464,41 @@ export interface SignatureItem {
   modifiers?: string;
   /** Additional rules or constraints associated with this item. */
   rules?: string;
+  /** If assigned from library, the template ID this item originated from. */
+  templateId?: string;
+}
+
+/**
+ * A reusable signature item template stored in the shared library.
+ * Characters pick from these templates to add items to their sheet.
+ */
+export interface SignatureItemTemplate {
+  id: string;
+  name: string;
+  description: string;
+  modifiers?: string;
+  rules?: string;
+  category?: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+/** Payload for POST /api/items/templates. */
+export interface CreateSignatureItemRequest {
+  name: string;
+  description: string;
+  modifiers?: string;
+  rules?: string;
+  category?: string;
+}
+
+/** Payload for PUT /api/items/templates/:id. */
+export interface UpdateSignatureItemRequest {
+  name?: string;
+  description?: string;
+  modifiers?: string;
+  rules?: string;
+  category?: string;
 }
 
 /**
@@ -482,6 +517,34 @@ export interface SpecialAbility {
   name: string;
   /** Description of what the ability does, including mechanical effects and bonuses. */
   effect: string;
+  /** If assigned from library, the template ID this ability originated from. */
+  templateId?: string;
+}
+
+/**
+ * A reusable ability template stored in the shared library.
+ */
+export interface AbilityTemplate {
+  id: string;
+  name: string;
+  effect: string;
+  category?: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+/** Payload for POST /api/abilities/templates. */
+export interface CreateAbilityRequest {
+  name: string;
+  effect: string;
+  category?: string;
+}
+
+/** Payload for PUT /api/abilities/templates/:id. */
+export interface UpdateAbilityRequest {
+  name?: string;
+  effect?: string;
+  category?: string;
 }
 
 /**
