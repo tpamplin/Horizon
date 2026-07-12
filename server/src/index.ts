@@ -20,6 +20,8 @@ import campaignRoutes from './routes/campaigns.js';
 import characterRoutes from './routes/characters.js';
 import npcRoutes from './routes/npcs.js';
 import uploadRoutes from './routes/upload.js';
+import itemTemplateRoutes from './routes/item-templates.js';
+import abilityTemplateRoutes from './routes/ability-templates.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -72,6 +74,12 @@ await fastify.register(npcRoutes);
 
 // Upload routes (protected POST, public GET for serving files)
 await fastify.register(uploadRoutes);
+
+// Item template routes (protected — require JWT)
+await fastify.register(itemTemplateRoutes);
+
+// Ability template routes (protected — require JWT)
+await fastify.register(abilityTemplateRoutes);
 
 // -----------------------------------------------------------------------------
 // Health Check
