@@ -231,6 +231,10 @@ export interface CreateCharacterRequest {
 export interface UpdateCharacterRequest {
   /** Full replacement of the character's sheet data. */
   sheetData: SheetData;
+  /** Optional updated character name. */
+  name?: string;
+  /** Optional updated character archetype. */
+  archetype?: string;
 }
 
 /** Payload for POST /api/campaigns/:id/characters (add character to roster). */

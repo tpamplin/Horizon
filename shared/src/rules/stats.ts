@@ -167,6 +167,11 @@ export function getStatDef(key: string): StatDefinition | undefined {
  * @returns A human-readable stat display string.
  */
 export function formatStatValue(value: number | string, modifier?: number): string {
+  // Empty / unset — display placeholder
+  if (value === '' || value === null || value === undefined) {
+    return '--';
+  }
+
   // String values (existing die strings like "D10") — pass through
   if (typeof value === 'string') {
     if (modifier && modifier !== 0) {
@@ -190,6 +195,11 @@ export function formatStatValue(value: number | string, modifier?: number): stri
 export function parseStatValue(value: number | string): ParsedStatValue {
   if (typeof value === 'number') {
     return { format: 'numeric', value };
+  }
+
+  // Empty / unset
+  if (value === '' || value === null || value === undefined) {
+    return { format: 'die' };
   }
 
   // Try to parse as die rating with optional modifier: "D10", "D10+2", "D8-1"
