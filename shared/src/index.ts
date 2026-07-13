@@ -34,6 +34,11 @@ export type {
   SignatureItemTemplate,
   CreateSignatureItemRequest,
   UpdateSignatureItemRequest,
+  ItemType,
+  ITEM_TYPES,
+  WeaponType,
+  WEAPON_TYPES,
+  ItemModifier,
   SpecialAbility,
   AbilityTemplate,
   CreateAbilityRequest,
@@ -89,4 +94,8 @@ export {
   awardAdversityTokens,
   deductAdversityTokens,
   checkSuccess,
+  computeStatModifier,
 } from './rules/stats.js';
+
+export type { SkillKey } from './rules/skills.js';
+export { SKILL_NAMES, SKILL_KEYS, getSkillName } from './rules/skills.js';

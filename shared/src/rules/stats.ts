@@ -399,3 +399,36 @@ export function checkSuccess(
     discardedRoll,
   };
 }
+
+// -----------------------------------------------------------------------------
+// Item Modifier Computation
+// -----------------------------------------------------------------------------
+
+/**
+ * An item modifier from a signature item or special ability.
+ */
+export interface ExternalModifierSource {
+  name: string;
+  modifiers?: { target: 'attribute' | 'skill'; key: string; value: number }[];
+}
+
+/**
+ * Sum all item/ability modifiers that target a specific stat key.
+ * Scans both signature items and special abilities for structuredModifiers.
+ *
+ * @param statKey — The attribute key to sum modifiers for (e.g. "force").
+ * @param items — Array of items with optional structuredModifiers.
+ * @returns The total modifier value (may be negative).
+ */
+export function computeStatModifier(statKey: string, items: ExternalModifierSource[]): number {
+  let total = 0;
+  for (const item of items) {
+    if (!item.modifiers) continue;
+    for (const mod of item.modifiers) {
+      if (mod.target === 'attribute' && mod.key === statKey) {
+        total += mod.value;
+      }
+    }
+  }
+  return total;
+}

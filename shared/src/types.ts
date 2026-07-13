@@ -455,17 +455,48 @@ export interface InventoryItem {
  * }
  * ```
  */
+/** The category of a signature item. */
+export type ItemType = 'weapon' | 'clothing' | 'gear';
+
+/** The attack style for weapon items. */
+export type WeaponType = 'melee' | 'ranged' | 'aoe';
+
+export const ITEM_TYPES: ItemType[] = ['weapon', 'clothing', 'gear'];
+export const WEAPON_TYPES: WeaponType[] = ['melee', 'ranged', 'aoe'];
+
+/** A structured modifier applied by an item — can target an attribute or a skill. */
+export interface ItemModifier {
+  /** Whether this modifies an attribute or a skill. */
+  target: 'attribute' | 'skill';
+  /** The attribute key (e.g. "cognition") or skill key (e.g. "stealth"). */
+  key: string;
+  /** The numeric bonus or penalty applied. */
+  value: number;
+}
+
 export interface SignatureItem {
   /** Display name of the item. */
   name: string;
   /** Flavor or functional description of the item. */
   description: string;
-  /** Mechanical modifiers this item provides (e.g. "+2 to all influence rolls"). */
+  /** Freeform mechanical modifiers text (legacy — prefer structuredModifiers). */
   modifiers?: string;
   /** Additional rules or constraints associated with this item. */
   rules?: string;
   /** If assigned from library, the template ID this item originated from. */
   templateId?: string;
+  /** The item category. */
+  itemType?: ItemType;
+  /** For weapons: the attack style. */
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  /** Bonus to attack rolls with this weapon. */
+  attackBonus?: number;
+  /** Bonus to damage with this weapon. */
+  damageBonus?: number;
+  /** Structured attribute and skill modifiers this item provides. */
+  structuredModifiers?: ItemModifier[];
 }
 
 /**
@@ -479,6 +510,13 @@ export interface SignatureItemTemplate {
   modifiers?: string;
   rules?: string;
   category?: string;
+  itemType?: ItemType;
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  attackBonus?: number;
+  damageBonus?: number;
+  structuredModifiers?: ItemModifier[];
   createdBy: string;
   createdAt: string;
 }
@@ -490,6 +528,13 @@ export interface CreateSignatureItemRequest {
   modifiers?: string;
   rules?: string;
   category?: string;
+  itemType?: ItemType;
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  attackBonus?: number;
+  damageBonus?: number;
+  structuredModifiers?: ItemModifier[];
 }
 
 /** Payload for PUT /api/items/templates/:id. */
@@ -499,6 +544,13 @@ export interface UpdateSignatureItemRequest {
   modifiers?: string;
   rules?: string;
   category?: string;
+  itemType?: ItemType;
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  attackBonus?: number;
+  damageBonus?: number;
+  structuredModifiers?: ItemModifier[];
 }
 
 /**
