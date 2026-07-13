@@ -31,6 +31,10 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.sheet-edit-header-text {
+  min-width: 0;
+}
+
 .sheet-edit-name {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
@@ -96,18 +100,159 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* Save button — primary action */
+.save-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.save-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.save-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Cancel button — secondary */
+.cancel-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.cancel-btn:hover {
+  background: var(--color-surface-overlay);
+  color: var(--color-text);
+}
+
+.cancel-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Discard confirmation modal */
+.discard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: var(--space-md);
+}
+
+.discard-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.discard-modal h2 {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text);
+}
+
+.discard-modal p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.discard-modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.discard-discard-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.discard-discard-btn:hover {
+  background: var(--color-error-muted);
+}
+
+.discard-discard-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.discard-keep-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.discard-keep-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.discard-keep-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Mobile: discard modal */
+@media (max-width: 480px) {
+  .discard-modal {
+    max-width: 100%;
+    margin: var(--space-sm);
+  }
+}
+
 /* -----------------------------------------------------------------------------
    Two-Column Body
    ----------------------------------------------------------------------------- */
 
 .sheet-edit-body {
+  /* Container only — columns handled by .sheet-edit-body-columns */
+}
+
+/* Two-column wrapper after Attributes */
+.sheet-edit-body-columns {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-lg);
 }
 
 @media (min-width: 640px) {
-  .sheet-edit-body {
+  .sheet-edit-body-columns {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -139,6 +284,28 @@
 }
 
 /* -----------------------------------------------------------------------------
+   Attributes — Horizontal Row
+   ----------------------------------------------------------------------------- */
+
+.edit-attrs-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-sm);
+}
+
+@media (max-width: 800px) {
+  .edit-attrs-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-attrs-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* -----------------------------------------------------------------------------
    Stat Editing
    ----------------------------------------------------------------------------- */
 
@@ -147,6 +314,44 @@
   align-items: center;
   gap: var(--space-sm);
   margin-bottom: var(--space-xs);
+}
+
+/* Compact stat cards in the horizontal attrs grid */
+.edit-attrs-grid .edit-stat-row {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.edit-attrs-grid .edit-stat-label {
+  width: auto;
+  text-align: center;
+  font-size: var(--font-size-xs);
+}
+
+.edit-attrs-grid .edit-stat-controls {
+  justify-content: center;
+}
+
+/* Die conflict warning */
+.edit-stat-die-select.die-conflict {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+
+.die-conflict-warning {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-xs);
+  animation: fadeIn 0.2s ease;
 }
 
 .edit-stat-label {
@@ -239,6 +444,14 @@
   outline: var(--focus-ring);
   outline-offset: var(--focus-ring-offset);
   border-color: var(--color-accent);
+}
+
+.edit-stat-computed-mod {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--space-xs);
 }
 
 /* -----------------------------------------------------------------------------
@@ -808,6 +1021,75 @@
   color: var(--color-text);
 }
 
+.pick-library-modal label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.pick-library-modal label input,
+.pick-library-modal label textarea {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.pick-library-modal label input:focus,
+.pick-library-modal label textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-muted);
+}
+
+.create-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.create-actions button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.create-actions button:first-child {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+}
+
+.create-actions button:first-child:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.create-actions button:first-child:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-cancel:hover {
+  background: var(--color-surface-overlay);
+}
+
 .pick-library-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -881,6 +1163,89 @@
   color: var(--color-text-muted);
   padding: var(--space-lg);
   font-size: var(--font-size-sm);
+}
+
+/* =============================================================================
+   Responsive — Mobile & Tablet
+   ============================================================================= */
+
+/* Stack header vertically */
+@media (max-width: 480px) {
+  .sheet-edit {
+    padding: var(--space-sm);
+  }
+
+  .sheet-edit-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+    text-align: center;
+  }
+
+  .sheet-edit-header-text {
+    text-align: center;
+  }
+
+  .sheet-edit-actions {
+    margin-left: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .save-indicator {
+    min-width: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Stat rows: stack label above control */
+  .edit-stat-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+
+  .edit-stat-label {
+    width: auto;
+    text-align: left;
+  }
+
+  /* Track levels: reduce indent */
+  .edit-track-levels {
+    margin-left: var(--space-xs);
+  }
+
+  .edit-level-stat-mod-key {
+    min-width: 60px;
+  }
+
+  /* Create actions: stack */
+  .create-actions {
+    flex-direction: column;
+  }
+
+  /* Discard modal: full width */
+  .discard-modal {
+    max-width: 100%;
+  }
+}
+
+/* Tablet: two-column body */
+@media (min-width: 481px) and (max-width: 768px) {
+  .sheet-edit-body-columns {
+    gap: var(--space-md);
+  }
+
+  .edit-stat-row {
+    gap: var(--space-xs);
+  }
 }
 
 /* Mobile: Pick from Library modal */

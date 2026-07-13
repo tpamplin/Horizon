@@ -115,11 +115,11 @@ describe('SheetEdit — die rating selector', () => {
     expect(selects[5]).toHaveValue('D4');  // stability default
   });
 
-  it('renders modifier inputs for each stat in die-format character', () => {
+  it('does not show manual modifier inputs (modifiers come from items)', () => {
     renderSheetEdit(dieChar);
 
-    const modInputs = screen.getAllByRole('spinbutton', { name: /modifier/i });
-    expect(modInputs).toHaveLength(6);
+    // No spinbutton elements labeled "modifier" should exist
+    expect(screen.queryByRole('spinbutton', { name: /modifier/i })).not.toBeInTheDocument();
   });
 
   it('changing die rating selects a new value', () => {
@@ -222,95 +222,49 @@ describe('SheetEdit — rich strength/flaw editing', () => {
 });
 
 // -----------------------------------------------------------------------------
-// Adversity Token Controls
+// Die Rating Conflict Detection
 // -----------------------------------------------------------------------------
 
-describe('SheetEdit — adversity tokens', () => {
-  it('displays current token count', () => {
-    renderSheetEdit(dieChar);
-    expect(screen.getByText('3')).toBeInTheDocument();
-  });
-
-  it('increase button calls change handler', () => {
+describe('SheetEdit — die rating conflict detection', () => {
+  it('allows selecting any die (no options disabled)', () => {
     renderSheetEdit(dieChar);
 
-    const addBtn = screen.getByRole('button', { name: /add one adversity token/i });
-    fireEvent.click(addBtn);
-    expect(screen.getByText('4')).toBeInTheDocument();
+    const selects = screen.getAllByRole('combobox', { name: /die rating/i });
+    const forceSelect = selects[1]!; // force currently D6
+    // D10 option in force select should NOT be disabled — all dice are selectable
+    const d10Option = forceSelect.querySelector('option[value="D10"]') as HTMLOptionElement;
+    expect(d10Option).not.toBeNull();
+    expect(d10Option.disabled).toBe(false);
   });
 
-  it('decrease button calls change handler', () => {
+  it('shows conflict warning when two stats share the same die', () => {
     renderSheetEdit(dieChar);
 
-    const removeBtn = screen.getByRole('button', { name: /remove one adversity token/i });
-    expect(removeBtn).not.toBeDisabled();
-    fireEvent.click(removeBtn);
-    expect(screen.getByText('2')).toBeInTheDocument();
-  });
-
-  it('decrease button is disabled at 0', () => {
-    const zeroChar = {
-      ...dieChar,
-      sheetData: { ...dieChar.sheetData, adversityTokens: 0 },
-    };
-    renderSheetEdit(zeroChar);
-
-    const removeBtn = screen.getByRole('button', { name: /remove one adversity token/i });
-    expect(removeBtn).toBeDisabled();
-  });
-});
-
-// -----------------------------------------------------------------------------
-// Die Rating Edge Cases
-// -----------------------------------------------------------------------------
-
-describe('SheetEdit — die rating edge cases', () => {
-  it('displays D4+2 modifier correctly', () => {
-    const char: Character = {
-      ...dieChar,
-      sheetData: {
-        ...dieChar.sheetData,
-        stats: { ...dieChar.sheetData.stats, cognition: 'D4+2' as unknown as string },
-      },
-    };
-    renderSheetEdit(char);
-
+    // Change cognition to D6 (same as force currently)
     const cognitionSelect = screen.getAllByRole('combobox', { name: /die rating/i })[0]!;
-    expect(cognitionSelect).toHaveValue('D4');
-    const modInput = screen.getAllByRole('spinbutton', { name: /modifier/i })[0]!;
-    expect(modInput).toHaveValue(2);
+    fireEvent.change(cognitionSelect, { target: { value: 'D6' } });
+
+    // Both cognition and force now show D6 — conflict warnings should appear
+    const warnings = screen.getAllByText('\u26A0 Duplicate');
+    expect(warnings.length).toBe(2);
   });
 
-  it('displays D20+5 modifier correctly', () => {
-    const char: Character = {
-      ...dieChar,
-      sheetData: {
-        ...dieChar.sheetData,
-        stats: { ...dieChar.sheetData.stats, influence: 'D20+5' as unknown as string },
-      },
-    };
-    renderSheetEdit(char);
+  it('removes conflict warning when duplicate is resolved', () => {
+    renderSheetEdit(dieChar);
 
-    const influenceSelect = screen.getAllByRole('combobox', { name: /die rating/i })[4]!;
-    expect(influenceSelect).toHaveValue('D20');
-    const modInput = screen.getAllByRole('spinbutton', { name: /modifier/i })[4]!;
-    expect(modInput).toHaveValue(5);
-  });
+    // Create conflict: set cognition to D6 (same as force)
+    const selects = screen.getAllByRole('combobox', { name: /die rating/i });
+    const cognitionSelect = selects[0]!;
+    fireEvent.change(cognitionSelect, { target: { value: 'D6' } });
 
-  it('handles negative modifier (D8-1)', () => {
-    const char: Character = {
-      ...dieChar,
-      sheetData: {
-        ...dieChar.sheetData,
-        stats: { ...dieChar.sheetData.stats, conflict: 'D8-1' as unknown as string },
-      },
-    };
-    renderSheetEdit(char);
+    // Both show warnings
+    expect(screen.getAllByText('\u26A0 Duplicate').length).toBe(2);
 
-    const conflictSelect = screen.getAllByRole('combobox', { name: /die rating/i })[3]!;
-    expect(conflictSelect).toHaveValue('D8');
-    const modInput = screen.getAllByRole('spinbutton', { name: /modifier/i })[3]!;
-    expect(modInput).toHaveValue(-1);
+    // Resolve: change cognition to unique die
+    fireEvent.change(cognitionSelect, { target: { value: 'D10' } });
+
+    // Warnings should be gone
+    expect(screen.queryByText('\u26A0 Duplicate')).not.toBeInTheDocument();
   });
 });
 
@@ -413,5 +367,102 @@ describe('SheetEdit — track modifier editing', () => {
     expect(statModInputs).toHaveLength(2);
     expect(statModInputs[0]).toHaveValue(5); // cognition
     expect(statModInputs[1]).toHaveValue(-5); // force
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Save / Cancel / Discard Flow
+// -----------------------------------------------------------------------------
+
+describe('SheetEdit — save/cancel/discard flow', () => {
+  it('renders Save button with correct aria-label', () => {
+    renderSheetEdit(dieChar);
+
+    const saveBtn = screen.getByRole('button', { name: /save character sheet/i });
+    expect(saveBtn).toBeInTheDocument();
+    expect(saveBtn).not.toBeDisabled();
+  });
+
+  it('renders Cancel button', () => {
+    renderSheetEdit(dieChar);
+
+    const cancelBtn = screen.getByRole('button', { name: /cancel editing/i });
+    expect(cancelBtn).toBeInTheDocument();
+  });
+
+  it('Cancel when clean calls onDone immediately (no modal)', () => {
+    const { onDone } = renderSheetEdit(dieChar);
+
+    const cancelBtn = screen.getByRole('button', { name: /cancel editing/i });
+    fireEvent.click(cancelBtn);
+
+    expect(onDone).toHaveBeenCalled();
+    // No discard modal should appear
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('Cancel when dirty shows discard confirmation modal', () => {
+    const { onDone } = renderSheetEdit(dieChar);
+
+    // Make a change to set isDirty (add a strength)
+    fireEvent.click(screen.getByRole('button', { name: /add strength/i }));
+
+    // Now cancel — should show modal, NOT call onDone
+    const cancelBtn = screen.getByRole('button', { name: /cancel editing — unsaved/i });
+    fireEvent.click(cancelBtn);
+
+    expect(onDone).not.toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    expect(screen.getByText(/discard unsaved changes/i)).toBeInTheDocument();
+  });
+
+  it('Discard button in modal closes modal and calls onDone', () => {
+    const { onDone } = renderSheetEdit(dieChar);
+
+    // Make dirty by adding a strength
+    fireEvent.click(screen.getByRole('button', { name: /add strength/i }));
+    // Trigger cancel → modal
+    fireEvent.click(screen.getByRole('button', { name: /cancel editing — unsaved/i }));
+    // Click Discard
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
+
+    expect(onDone).toHaveBeenCalled();
+    // Modal should be gone
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+  });
+
+  it('Keep Editing button closes modal, stays in edit mode', () => {
+    const { onDone } = renderSheetEdit(dieChar);
+
+    // Make dirty by adding a strength
+    fireEvent.click(screen.getByRole('button', { name: /add strength/i }));
+    // Trigger cancel → modal
+    fireEvent.click(screen.getByRole('button', { name: /cancel editing — unsaved/i }));
+    // Click Keep Editing
+    fireEvent.click(screen.getByRole('button', { name: 'Keep Editing' }));
+
+    expect(onDone).not.toHaveBeenCalled();
+    // Modal should be gone, but still in edit mode (Save button visible)
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /save character sheet/i })).toBeInTheDocument();
+  });
+
+  it('Save button calls onSave and returns to view', async () => {
+    vi.useFakeTimers();
+    const { onSave, onDone } = renderSheetEdit(dieChar);
+
+    const saveBtn = screen.getByRole('button', { name: /save character sheet/i });
+    fireEvent.click(saveBtn);
+
+    // onSave should be called immediately
+    expect(onSave).toHaveBeenCalled();
+    // onDone should NOT be called yet (400ms delay)
+    expect(onDone).not.toHaveBeenCalled();
+
+    // After 400ms, onDone should be called
+    vi.advanceTimersByTime(400);
+    expect(onDone).toHaveBeenCalled();
+
+    vi.useRealTimers();
   });
 });
