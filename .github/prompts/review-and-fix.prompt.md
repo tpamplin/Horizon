@@ -73,8 +73,13 @@ If any file operation fails unexpectedly:
 
 ## Phase 2 — Identify Changes
 
-1. Run `git diff --name-only HEAD~1` (or `git log --oneline -5` to find the right range). Include unstaged changes and untracked files.
-2. Build a file manifest grouped by layer:
+1. Run ALL of the following to identify changes:
+   - `git status --short` — check for uncommitted work
+   - `git log --oneline -10` — find the commit range to review
+   - `git diff --name-only <base>..HEAD` where `<base>` is the commit BEFORE the story's work began. **Never rely on `HEAD~1` alone** — stories often span multiple commits. If unsure of the base, use `git log --oneline -15` and trace back to the last commit clearly NOT part of this story.
+   - If the working tree is clean and `git diff <base>..HEAD` is empty, **expand the range** (e.g., `HEAD~5`, `HEAD~10`) until changes appear. Check `git log --oneline` to identify the commit where this story's work began.
+2. **If no changes are found after exhausting all ranges, stop and report:** "No changes detected — the story may not be implemented yet. Checked: unstaged, staged, and last 10 commits. Please confirm the commit range." Do NOT proceed to Phase 3 with zero files.
+3. Build a file manifest grouped by layer:
 
    | Layer  | Files Changed                                              |
    | ------ | ---------------------------------------------------------- |
@@ -84,7 +89,7 @@ If any file operation fails unexpectedly:
    | Config | `package.json`, `.vscode/`                                 |
    | Docs   | `plan/`, `README.md`                                       |
 
-3. Read **every new file in full.** For modified files, read the changed sections plus surrounding context.
+4. Read **every new file in full.** For modified files, read the changed sections plus surrounding context.
 
 **Gate check:** Before moving to Phase 3, confirm you have read every file in the manifest. If any file is unreadable or its purpose is unclear, pause and ask.
 
