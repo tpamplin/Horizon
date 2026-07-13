@@ -1,61 +1,129 @@
 /* =============================================================================
    Horizon — PortraitUpload Styles
    =============================================================================
-   Dark-themed portrait upload component with circular preview and
-   file selection controls.
+   Circular portrait with edit-icon overlay. Click the circle to change.
    ============================================================================= */
 
-.portrait-upload {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-muted);
-  border-radius: var(--radius-md);
-}
-
-.portrait-upload-preview {
-  width: 100px;
-  height: 100px;
+.portrait-upload-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
   border-radius: var(--radius-full);
-  overflow: hidden;
-  border: 2px dashed var(--color-border);
+  overflow: visible;
+  cursor: pointer;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-raised);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-surface-raised);
   transition: border-color var(--transition-fast);
+  flex-shrink: 0;
 }
 
-.portrait-upload-preview:hover {
+.portrait-upload-circle:hover,
+.portrait-upload-circle:focus-visible {
   border-color: var(--color-accent);
+  outline: none;
 }
 
-.portrait-preview-img {
+.portrait-upload-circle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.portrait-circle-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   border-radius: var(--radius-full);
+  object-fit: cover;
 }
 
-.portrait-preview-empty {
+.portrait-circle-empty {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-muted);
   user-select: none;
 }
 
-.portrait-upload-controls {
+/* Edit badge — pencil icon overlaying bottom-right */
+.portrait-edit-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-size: 12px;
   display: flex;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-surface);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Remove badge — appears on hover */
+.portrait-remove-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-surface);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.portrait-upload-circle:hover .portrait-remove-badge {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.portrait-remove-badge:hover {
+  background: #c0392b;
+}
+
+/* Upload spinner overlay */
+.portrait-upload-spinner {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
   justify-content: center;
 }
 
+.portrait-upload-spinner::after {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: portrait-spin 0.6s linear infinite;
+}
+
+@keyframes portrait-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hidden file input */
 .portrait-file-input {
-  /* Hidden but accessible */
   position: absolute;
   width: 1px;
   height: 1px;
@@ -67,56 +135,13 @@
   border: 0;
 }
 
-.portrait-browse-btn {
-  padding: var(--space-xs) var(--space-md);
-  background: var(--color-accent);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.portrait-browse-btn:hover:not(:disabled) {
-  background: var(--color-accent-hover);
-}
-
-.portrait-browse-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.portrait-browse-btn:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
-}
-
-.portrait-remove-btn {
-  padding: var(--space-xs) var(--space-md);
-  background: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.portrait-remove-btn:hover {
-  color: var(--color-error);
-  border-color: var(--color-error);
-}
-
-.portrait-remove-btn:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-ring-offset);
-}
-
 .portrait-upload-error {
-  font-size: var(--font-size-xs);
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
   color: var(--color-error);
   margin: 0;
-  text-align: center;
+  white-space: nowrap;
 }

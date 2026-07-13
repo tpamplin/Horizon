@@ -1,9 +1,8 @@
 // =============================================================================
 // Horizon — PortraitUpload Component
 // =============================================================================
-// File upload component for character portraits. Reads the selected image
-// file as a base64 data URL and sends it to POST /api/upload. Shows a
-// circular preview and loading/error states.
+// Circular portrait with an edit-icon overlay. Clicking the circle opens a
+// file picker. Shows a spinner during upload and an error message on failure.
 // =============================================================================
 
 import { useState, useRef } from 'react';
@@ -38,33 +37,25 @@ export function PortraitUpload({ onPortraitChange, currentUrl }: PortraitUploadP
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (file: File) => {
-    // Validate type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setError('Unsupported file type. Please use PNG, JPEG, GIF, or WebP.');
+      setError('Unsupported file type. Use PNG, JPEG, GIF, or WebP.');
       return;
     }
-
-    // Validate size
     if (file.size > MAX_SIZE) {
-      setError(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum is 5 MB.`);
+      setError(`File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Max 5 MB.`);
       return;
     }
-
     setError(null);
 
-    // Read file as base64
     const dataUrl = await readFileAsDataUrl(file);
     setPreview(dataUrl);
-
-    // Upload
     setUploading(true);
     try {
       const result = await api.post<{ url: string }>('/api/upload', { image: dataUrl });
       onPortraitChange(result.url);
       setPreview(result.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed. Please try again.');
-      // Revert preview to previous URL
+      setError(err instanceof Error ? err.message : 'Upload failed.');
       setPreview(currentUrl ?? null);
     } finally {
       setUploading(false);
@@ -73,59 +64,52 @@ export function PortraitUpload({ onPortraitChange, currentUrl }: PortraitUploadP
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-    // Reset input so the same file can be selected again
+    if (file) handleFileSelect(file);
     e.target.value = '';
   };
 
-  const handleBrowse = () => {
-    fileInputRef.current?.click();
+  const handleClick = () => {
+    if (!uploading) fileInputRef.current?.click();
+  };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPreview(null);
+    onPortraitChange('');
   };
 
   return (
-    <div className="portrait-upload">
-      <div className="portrait-upload-preview" aria-label="Portrait preview">
-        {preview ? (
-          <img src={preview} alt="Character portrait preview" className="portrait-preview-img" />
-        ) : (
-          <div className="portrait-preview-empty" aria-hidden="true">?</div>
-        )}
-      </div>
-
-      <div className="portrait-upload-controls">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/gif,image/webp"
-          onChange={handleInputChange}
-          className="portrait-file-input"
-          aria-label="Choose a portrait image file"
-        />
+    <div className="portrait-upload-circle" onClick={handleClick} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }} aria-label={preview ? 'Change portrait' : 'Add portrait'}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/gif,image/webp"
+        onChange={handleInputChange}
+        className="portrait-file-input"
+        aria-label="Choose a portrait image file"
+      />
+      {preview ? (
+        <img src={preview} alt="Character portrait" className="portrait-circle-img" />
+      ) : (
+        <div className="portrait-circle-empty" aria-hidden="true">
+          {currentUrl ? '?' : '?'}
+        </div>
+      )}
+      {uploading && (
+        <div className="portrait-upload-spinner" aria-label="Uploading portrait" />
+      )}
+      <span className="portrait-edit-badge" aria-hidden="true">✎</span>
+      {preview && (
         <button
           type="button"
-          className="portrait-browse-btn"
-          onClick={handleBrowse}
-          disabled={uploading}
+          className="portrait-remove-badge"
+          onClick={handleRemove}
+          aria-label="Remove portrait"
+          tabIndex={-1}
         >
-          {uploading ? 'Uploading…' : preview ? 'Change Portrait' : 'Choose Portrait'}
+          ×
         </button>
-        {preview && !uploading && (
-          <button
-            type="button"
-            className="portrait-remove-btn"
-            onClick={() => {
-              setPreview(null);
-              onPortraitChange('');
-            }}
-            aria-label="Remove portrait"
-          >
-            Remove
-          </button>
-        )}
-      </div>
-
+      )}
       {error && (
         <p className="portrait-upload-error" role="alert" aria-live="assertive">
           {error}
