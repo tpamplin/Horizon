@@ -13,5 +13,6 @@ export default defineConfig({
     environmentMatchGlobs: [['client/**', 'jsdom']],
     setupFiles: ['./client/src/test-setup.ts'],
     globals: true,
+    restoreMocks: true,
   },
 });
