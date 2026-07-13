@@ -11,7 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 // Mock stores before importing components that use them
 vi.mock('../../stores/characterStore.js', () => ({
-  useCharacterStore: (selector?: (s: any) => any) => {
+  useCharacterStore: (selector?: (s: Record<string, unknown>) => unknown) => {
     const state = {
       campaignCharacters: [],
       fetchMyCharacters: vi.fn(),
@@ -25,7 +25,7 @@ vi.mock('../../stores/characterStore.js', () => ({
 }));
 
 vi.mock('../../stores/npcStore.js', () => ({
-  useNPCStore: (selector?: (s: any) => any) => {
+  useNPCStore: (selector?: (s: Record<string, unknown>) => unknown) => {
     const state = {
       npcs: [],
       fetchMyNPCs: vi.fn(),
