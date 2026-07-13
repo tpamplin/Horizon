@@ -7,6 +7,9 @@ import {
   STATS,
   STAT_KEYS,
   getStatDef,
+  formatStatValue,
+  parseStatValue,
+  DIE_RATINGS,
   validateStatValue,
   DEFAULT_ADVERSITY_TOKENS,
   MIN_ADVERSITY_TOKENS,
@@ -68,6 +71,92 @@ describe('stat definitions', () => {
   it('getStatDef returns undefined for invalid key', () => {
     expect(getStatDef('luck')).toBeUndefined();
     expect(getStatDef('')).toBeUndefined();
+  });
+});
+
+// -----------------------------------------------------------------------------
+// formatStatValue & parseStatValue
+// -----------------------------------------------------------------------------
+
+describe('formatStatValue', () => {
+  it('formats numeric values as strings', () => {
+    expect(formatStatValue(3)).toBe('3');
+    expect(formatStatValue(0)).toBe('0');
+    expect(formatStatValue(10)).toBe('10');
+  });
+
+  it('passes through existing die strings', () => {
+    expect(formatStatValue('D10')).toBe('D10');
+    expect(formatStatValue('D20')).toBe('D20');
+    expect(formatStatValue('D4')).toBe('D4');
+  });
+
+  it('appends modifier to die strings', () => {
+    expect(formatStatValue('D10', 2)).toBe('D10+2');
+    expect(formatStatValue('D8', -1)).toBe('D8-1');
+    expect(formatStatValue('D20', 0)).toBe('D20');
+  });
+});
+
+describe('parseStatValue', () => {
+  it('parses numeric values', () => {
+    const result = parseStatValue(5);
+    expect(result.format).toBe('numeric');
+    expect(result.value).toBe(5);
+  });
+
+  it('parses die strings without modifier', () => {
+    const result = parseStatValue('D10');
+    expect(result.format).toBe('die');
+    expect(result.die).toBe('D10');
+    expect(result.modifier).toBeUndefined();
+  });
+
+  it('parses die strings with positive modifier', () => {
+    const result = parseStatValue('D10+2');
+    expect(result.format).toBe('die');
+    expect(result.die).toBe('D10');
+    expect(result.modifier).toBe(2);
+  });
+
+  it('parses die strings with negative modifier', () => {
+    const result = parseStatValue('D8-1');
+    expect(result.format).toBe('die');
+    expect(result.die).toBe('D8');
+    expect(result.modifier).toBe(-1);
+  });
+
+  it('falls back to numeric for number-like strings', () => {
+    const result = parseStatValue('7');
+    expect(result.format).toBe('numeric');
+    expect(result.value).toBe(7);
+  });
+
+  it('handles all valid die ratings', () => {
+    for (const die of DIE_RATINGS) {
+      const result = parseStatValue(die);
+      expect(result.format).toBe('die');
+      expect(result.die).toBe(die);
+    }
+  });
+});
+
+describe('die ratings', () => {
+  it('has 6 die ratings', () => {
+    expect(DIE_RATINGS).toHaveLength(6);
+  });
+
+  it('are ordered from smallest to largest', () => {
+    expect(DIE_RATINGS).toEqual(['D4', 'D6', 'D8', 'D10', 'D12', 'D20']);
+  });
+
+  it('each stat definition has a default die', () => {
+    for (const key of STAT_KEYS) {
+      const def = STATS[key];
+      expect(def.format).toBeDefined();
+      expect(def.defaultDie).toBeDefined();
+      expect(DIE_RATINGS).toContain(def.defaultDie);
+    }
   });
 });
 

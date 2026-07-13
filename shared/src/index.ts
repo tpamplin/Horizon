@@ -16,12 +16,33 @@ export type {
   CampaignDetailResponse,
   CampaignPlayerDetail,
   CampaignCharacterBrief,
+  CreateCharacterRequest,
+  UpdateCharacterRequest,
+  AddCharacterToCampaignRequest,
+  CampaignCharacter,
   Character,
   NPC,
+  StrengthEntry,
+  FlawEntry,
+  CampaignNPC,
+  CreateNPCRequest,
+  UpdateNPCRequest,
+  AddNPCToCampaignRequest,
   CharacterStats,
   InventoryItem,
   SignatureItem,
+  SignatureItemTemplate,
+  CreateSignatureItemRequest,
+  UpdateSignatureItemRequest,
+  ItemType,
+  ITEM_TYPES,
+  WeaponType,
+  WEAPON_TYPES,
+  ItemModifier,
   SpecialAbility,
+  AbilityTemplate,
+  CreateAbilityRequest,
+  UpdateAbilityRequest,
   TrackModifier,
   CustomTrack,
   SheetData,
@@ -49,16 +70,32 @@ export type { DiceGroup, DicePool, RollResult, DieSides, ResolveOptions } from '
 
 export { parseDicePool, resolveDiceRoll } from './rules/dice.js';
 
-export type { StatKey, StatDefinition, CheckResult, CheckOptions } from './rules/stats.js';
+export type {
+  StatKey,
+  StatDefinition,
+  CheckResult,
+  CheckOptions,
+  DieRating,
+  StatFormat,
+  ParsedStatValue,
+} from './rules/stats.js';
 
 export {
   STATS,
   STAT_KEYS,
+  DIE_RATINGS,
+  DIE_SIDES,
   DEFAULT_ADVERSITY_TOKENS,
   MIN_ADVERSITY_TOKENS,
   getStatDef,
+  formatStatValue,
+  parseStatValue,
   validateStatValue,
   awardAdversityTokens,
   deductAdversityTokens,
   checkSuccess,
+  computeStatModifier,
 } from './rules/stats.js';
+
+export type { SkillKey } from './rules/skills.js';
+export { SKILL_NAMES, SKILL_KEYS, getSkillName } from './rules/skills.js';

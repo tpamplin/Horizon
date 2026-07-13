@@ -67,13 +67,19 @@ db.exec(`
   );
   CREATE TABLE IF NOT EXISTS characters (
     id             TEXT PRIMARY KEY,
-    campaign_id    TEXT NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
     player_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name           TEXT NOT NULL,
     archetype      TEXT NOT NULL DEFAULT '',
     portrait_url   TEXT,
     sheet_data     TEXT NOT NULL DEFAULT '{}',
     created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS campaign_characters (
+    campaign_id  TEXT NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
+    character_id TEXT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    added_by     TEXT NOT NULL REFERENCES users(id),
+    added_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (campaign_id, character_id)
   );
 `);
 
@@ -144,6 +150,7 @@ afterAll(async () => {
 });
 
 beforeEach(() => {
+  db.exec('DELETE FROM campaign_characters');
   db.exec('DELETE FROM characters');
   db.exec('DELETE FROM campaign_players');
   db.exec('DELETE FROM campaigns');

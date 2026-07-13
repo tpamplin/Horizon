@@ -195,6 +195,39 @@
   text-overflow: ellipsis;
 }
 
+/* Footer — Character List */
+
+.sidebar-characters {
+  margin-bottom: 0.75rem;
+}
+
+.character-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.character-link:hover {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+}
+
+.character-link:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.character-archetype {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 /* Footer — Player List */
 
 .sidebar-footer {
@@ -302,4 +335,147 @@
   min-height: calc(100vh - 2rem);
   color: var(--color-text-secondary);
   font-size: 1.25rem;
+}
+
+/* -----------------------------------------------------------------------------
+   Sidebar Add Buttons
+   ----------------------------------------------------------------------------- */
+
+.sidebar-add-btn {
+  display: block;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  margin: var(--space-xs) 0;
+  background: transparent;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-add-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* -----------------------------------------------------------------------------
+   Add-to-Campaign Modal
+   ----------------------------------------------------------------------------- */
+
+.add-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 400px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.add-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.add-modal-header h3 {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.add-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.add-modal-close:hover {
+  color: var(--color-text);
+}
+
+.add-modal-loading,
+.add-modal-empty {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.add-modal-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-sm);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.add-modal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.add-modal-item:hover {
+  background: var(--color-surface-raised);
+}
+
+.add-modal-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.add-modal-item-name {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.add-modal-item-type {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.add-modal-add-btn {
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.add-modal-add-btn:hover {
+  opacity: 0.85;
 }

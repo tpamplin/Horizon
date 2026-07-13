@@ -1,0 +1,1318 @@
+/* =============================================================================
+   Horizon — SheetEdit Styles
+   =============================================================================
+   Dark-themed form styling for the editable character sheet. Uses theme.css
+   custom properties exclusively.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Container
+   ----------------------------------------------------------------------------- */
+
+.sheet-edit {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+
+/* -----------------------------------------------------------------------------
+   Header
+   ----------------------------------------------------------------------------- */
+
+.sheet-edit-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sheet-edit-header-text {
+  min-width: 0;
+}
+
+/* Name & archetype inline editing */
+.sheet-edit-name-row,
+.sheet-edit-archetype-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.sheet-edit-name-input {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  width: 100%;
+  max-width: 400px;
+}
+
+.sheet-edit-archetype-input {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  width: 100%;
+  max-width: 300px;
+}
+
+.sheet-edit-inline-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sheet-edit-inline-btn:hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-accent);
+}
+
+.sheet-edit-inline-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.sheet-edit-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: var(--color-text);
+}
+
+.sheet-edit-archetype {
+  font-size: var(--font-size-md);
+  color: var(--color-accent);
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+}
+
+.sheet-edit-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.save-indicator {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  min-width: 100px;
+  text-align: right;
+}
+
+.save-idle {
+  color: transparent;
+}
+
+.save-saving {
+  color: var(--color-text-muted);
+}
+
+.save-saved {
+  color: var(--color-success);
+}
+
+.save-error {
+  color: var(--color-error);
+}
+
+.done-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.done-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.done-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Save button — primary action */
+.save-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.save-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.save-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Cancel button — secondary */
+.cancel-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.cancel-btn:hover {
+  background: var(--color-surface-overlay);
+  color: var(--color-text);
+}
+
+.cancel-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Discard confirmation modal */
+.discard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: var(--space-md);
+}
+
+.discard-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.discard-modal h2 {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text);
+}
+
+.discard-modal p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.discard-modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.discard-discard-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.discard-discard-btn:hover {
+  background: var(--color-error-muted);
+}
+
+.discard-discard-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.discard-keep-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.discard-keep-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.discard-keep-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Mobile: discard modal */
+@media (max-width: 480px) {
+  .discard-modal {
+    max-width: 100%;
+    margin: var(--space-sm);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Two-Column Body
+   ----------------------------------------------------------------------------- */
+
+.sheet-edit-body {
+  /* Container only — columns handled by .sheet-edit-body-columns */
+}
+
+/* Two-column wrapper after Attributes */
+.sheet-edit-body-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 640px) {
+  .sheet-edit-body-columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Sections
+   ----------------------------------------------------------------------------- */
+
+.edit-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.edit-section-gm {
+  border-color: var(--color-accent);
+  border-left: 3px solid var(--color-accent);
+}
+
+.edit-section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-sm);
+}
+
+/* -----------------------------------------------------------------------------
+   Attributes — Horizontal Row
+   ----------------------------------------------------------------------------- */
+
+.edit-attrs-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-sm);
+}
+
+@media (max-width: 800px) {
+  .edit-attrs-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-attrs-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Stat Editing
+   ----------------------------------------------------------------------------- */
+
+.edit-stat-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+/* Compact stat cards in the horizontal attrs grid */
+.edit-attrs-grid .edit-stat-row {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.edit-attrs-grid .edit-stat-label {
+  width: auto;
+  text-align: center;
+  font-size: var(--font-size-xs);
+}
+
+.edit-attrs-grid .edit-stat-controls {
+  justify-content: center;
+}
+
+/* Die conflict warning */
+.edit-stat-die-select.die-conflict {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 1px var(--color-error);
+}
+
+.die-conflict-warning {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--space-xs);
+  animation: fadeIn 0.2s ease;
+}
+
+.edit-stat-label {
+  width: 90px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.edit-stat-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.stat-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  line-height: 1;
+  padding: 0;
+}
+
+.stat-btn:hover:not(:disabled) {
+  background: var(--color-surface-overlay);
+  border-color: var(--color-accent);
+}
+
+.stat-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stat-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.edit-stat-value {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  min-width: 30px;
+  text-align: center;
+}
+
+.edit-stat-die-select {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  min-width: 72px;
+}
+
+.edit-stat-die-select:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--color-accent);
+}
+
+.edit-stat-modifier {
+  width: 52px;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.edit-stat-modifier:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--color-accent);
+}
+
+.edit-stat-computed-mod {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--space-xs);
+}
+
+/* -----------------------------------------------------------------------------
+   Adversity Tokens
+   ----------------------------------------------------------------------------- */
+
+.edit-tokens {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+}
+
+.token-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  line-height: 1;
+  padding: 0;
+}
+
+.token-btn:hover:not(:disabled) {
+  background: var(--color-accent-muted);
+  border-color: var(--color-accent);
+}
+
+.token-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.token-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.edit-tokens-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* -----------------------------------------------------------------------------
+   Tags
+   ----------------------------------------------------------------------------- */
+
+.edit-tag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.edit-tag-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tag-remove-btn {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.tag-remove-btn:hover {
+  color: var(--color-error);
+  background: var(--color-error-muted);
+}
+
+.tag-remove-btn:focus-visible {
+  outline: var(--focus-ring);
+}
+
+.tag-input-row {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.tag-input {
+  flex: 1;
+}
+
+/* ---- Rich Entry (strengths/flaws with name + description) ---- */
+
+.edit-rich-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-muted);
+  position: relative;
+}
+
+.edit-rich-entry .item-remove-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.edit-textarea-sm {
+  font-size: var(--font-size-sm);
+  min-height: 40px;
+}
+
+/* ---- SheetView Rich Trait ---- */
+
+.trait-entry-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.trait-entry {
+  margin-bottom: var(--space-xs);
+}
+
+.trait-entry-inner {
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.trait-entry-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: var(--space-xs) 0;
+  text-align: left;
+  font-family: inherit;
+}
+
+.trait-entry-toggle:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.trait-entry-toggle:hover:not(:disabled) {
+  color: var(--color-accent);
+}
+
+.trait-entry-toggle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.trait-entry-name {
+  font-weight: var(--font-weight-medium);
+}
+
+.trait-entry-chevron {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  margin-left: var(--space-sm);
+}
+
+.trait-entry-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: var(--space-xs) 0 0;
+  padding-left: var(--space-sm);
+  border-left: 2px solid var(--color-border);
+}
+
+.trait-strength .trait-entry-desc {
+  border-left-color: var(--color-success);
+}
+
+.trait-flaw .trait-entry-desc {
+  border-left-color: var(--color-warning);
+}
+
+.tag-add-btn {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+
+.tag-add-btn:hover {
+  background: var(--color-surface-overlay);
+  color: var(--color-text);
+}
+
+.tag-add-btn:focus-visible {
+  outline: var(--focus-ring);
+}
+
+/* -----------------------------------------------------------------------------
+   Form Inputs
+   ----------------------------------------------------------------------------- */
+
+.edit-input {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-muted);
+}
+
+.edit-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.edit-textarea {
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+}
+
+.edit-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-muted);
+}
+
+.edit-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.edit-textarea-lg {
+  min-height: 80px;
+}
+
+/* -----------------------------------------------------------------------------
+   Inventory Rows
+   ----------------------------------------------------------------------------- */
+
+.edit-inv-row {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  margin-bottom: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.inv-name-input {
+  flex: 2;
+  min-width: 80px;
+}
+
+.inv-qty-input {
+  width: 60px;
+}
+
+.inv-notes-input {
+  flex: 1;
+  min-width: 80px;
+}
+
+/* -----------------------------------------------------------------------------
+   Signature / Ability / Track Rows
+   ----------------------------------------------------------------------------- */
+
+.edit-sig-row,
+.edit-ability-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
+.edit-track-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.edit-track-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  min-width: 100px;
+}
+
+.edit-track-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.edit-track-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+  min-width: 60px;
+  text-align: center;
+}
+
+/* -----------------------------------------------------------------------------
+   Remove / Add Buttons
+   ----------------------------------------------------------------------------- */
+
+.item-remove-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.item-remove-btn:hover {
+  color: var(--color-error);
+  background: var(--color-error-muted);
+}
+
+.item-remove-btn:focus-visible {
+  outline: var(--focus-ring);
+}
+
+.add-item-btn {
+  padding: var(--space-xs) var(--space-md);
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  width: 100%;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.add-item-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted);
+}
+
+.add-item-btn:focus-visible {
+  outline: var(--focus-ring);
+}
+
+/* -----------------------------------------------------------------------------
+   Bottom Sections
+   ----------------------------------------------------------------------------- */
+
+.sheet-edit-bottom {
+  grid-column: 1 / -1;
+  margin-top: var(--space-md);
+}
+
+/* -----------------------------------------------------------------------------
+   Track Level Editing
+   ----------------------------------------------------------------------------- */
+
+.edit-track-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: var(--space-sm);
+}
+
+.edit-track-levels {
+  margin-left: var(--space-md);
+  padding-left: var(--space-sm);
+  border-left: 2px solid var(--color-border);
+}
+
+.edit-track-level-item {
+  margin-bottom: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+
+.edit-track-level-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.edit-track-level-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.edit-level-num {
+  width: 52px;
+  text-align: center;
+}
+
+/* ---- Level Stat Modifiers ---- */
+
+.edit-level-stat-mods {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-border-muted);
+}
+
+.edit-level-stat-mods-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.edit-level-stat-mod-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+}
+
+.edit-level-stat-mod-key {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  min-width: 80px;
+  text-transform: capitalize;
+}
+
+.edit-stat-mod-input {
+  width: 60px;
+  text-align: center;
+}
+
+/* ---- Stat Mod Add Menu ---- */
+
+.stat-mod-add-wrapper {
+  position: relative;
+  margin-top: var(--space-xs);
+}
+
+.add-stat-mod-btn {
+  font-size: var(--font-size-xs);
+}
+
+.stat-mod-add-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 160px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.stat-mod-add-option {
+  display: block;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.stat-mod-add-option:hover {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+/* ---- Library Picker ---- */
+
+.pick-lib-btn {
+  width: auto;
+  font-size: var(--font-size-xs);
+}
+
+.pick-library-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: var(--space-md);
+}
+
+.pick-library-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  max-width: 560px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.pick-library-modal h2 {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-md);
+  color: var(--color-text);
+}
+
+.pick-library-modal label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.pick-library-modal label input,
+.pick-library-modal label textarea {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.pick-library-modal label input:focus,
+.pick-library-modal label textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-muted);
+}
+
+.create-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.create-actions button {
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.create-actions button:first-child {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+}
+
+.create-actions button:first-child:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.create-actions button:first-child:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-cancel:hover {
+  background: var(--color-surface-overlay);
+}
+
+.pick-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.pick-item-card {
+  padding: var(--space-sm);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.pick-item-card:hover,
+.pick-item-card:focus-visible {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted);
+}
+
+.pick-item-card h4 {
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--space-xs);
+  color: var(--color-text);
+}
+
+.pick-item-card p {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.pick-close {
+  display: block;
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pick-close:hover {
+  background: var(--color-surface-overlay);
+}
+
+.pick-library-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--space-md);
+}
+
+.tmpl-badge {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  padding: 1px var(--space-xs);
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+}
+
+.loading-msg {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-lg);
+  font-size: var(--font-size-sm);
+}
+
+/* =============================================================================
+   Responsive — Mobile & Tablet
+   ============================================================================= */
+
+/* Stack header vertically */
+@media (max-width: 480px) {
+  .sheet-edit {
+    padding: var(--space-sm);
+  }
+
+  .sheet-edit-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+    text-align: center;
+  }
+
+  .sheet-edit-header-text {
+    text-align: center;
+  }
+
+  .sheet-edit-actions {
+    margin-left: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .save-indicator {
+    min-width: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Stat rows: stack label above control */
+  .edit-stat-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+
+  .edit-stat-label {
+    width: auto;
+    text-align: left;
+  }
+
+  /* Track levels: reduce indent */
+  .edit-track-levels {
+    margin-left: var(--space-xs);
+  }
+
+  .edit-level-stat-mod-key {
+    min-width: 60px;
+  }
+
+  /* Create actions: stack */
+  .create-actions {
+    flex-direction: column;
+  }
+
+  /* Discard modal: full width */
+  .discard-modal {
+    max-width: 100%;
+  }
+}
+
+/* Tablet: two-column body */
+@media (min-width: 481px) and (max-width: 768px) {
+  .sheet-edit-body-columns {
+    gap: var(--space-md);
+  }
+
+  .edit-stat-row {
+    gap: var(--space-xs);
+  }
+}
+
+/* Mobile: Pick from Library modal */
+@media (max-width: 480px) {
+  .pick-library-overlay {
+    padding: var(--space-sm);
+    align-items: flex-start;
+  }
+
+  .pick-library-modal {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+
+  .pick-library-grid {
+    grid-template-columns: 1fr;
+  }
+}

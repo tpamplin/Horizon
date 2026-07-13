@@ -7,6 +7,7 @@
 // =============================================================================
 
 import db from './db.js';
+import { findCampaignCharacters } from './character.js';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -192,15 +193,15 @@ export interface CharacterBriefRow {
 
 /**
  * Find all characters in a campaign (brief — id, name, archetype only).
+ * Delegates to the character model's campaign roster query.
  */
 export function findCharactersByCampaign(campaignId: string): CharacterBriefRow[] {
-  const stmt = db.prepare(`
-    SELECT id, name, archetype
-    FROM characters
-    WHERE campaign_id = ?
-    ORDER BY name
-  `);
-  return stmt.all(campaignId) as CharacterBriefRow[];
+  const rows = findCampaignCharacters(campaignId);
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    archetype: r.archetype,
+  }));
 }
 
 // -----------------------------------------------------------------------------

@@ -40,7 +40,7 @@ declare module 'fastify' {
 // Public paths (no auth required)
 // -----------------------------------------------------------------------------
 
-const PUBLIC_PREFIXES = ['/api/auth/', '/api/health'];
+const PUBLIC_PREFIXES = ['/api/auth/', '/api/health', '/uploads/'];
 
 function isPublicPath(url: string): boolean {
   // /api/auth/me is protected — requires a valid JWT

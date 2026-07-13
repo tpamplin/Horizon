@@ -30,7 +30,7 @@ Horizon stories are decomposed into subtasks that may run in parallel across mul
 
 ### Phase 1 — Fetch Context & Classify
 
-1. Fetch the story via Atlassian MCP (`getJiraIssue`) using the key below.
+1. Fetch the story via Atlassian MCP (`getJiraIssue`) using the key below. If the Atlassian MCP tools are disabled, activate them first by calling `activate_jira_issue_management`.
 2. Fetch the parent epic if linked.
 3. Read the story's acceptance criteria, scope, and work-involved sections.
 4. Read `plan/vtt-design-doc.md` for architecture decisions and `plan/implementation-plan.md` for phase-level context.
@@ -91,6 +91,7 @@ Use Atlassian MCP `createJiraIssue` to create each subtask:
 - **Always set the parent** via `editJiraIssue` with `{"parent": {"key": "HZN-XX"}}` immediately after each creation.
 - **Always set the assignee** — call `atlassianUserInfo` once for the current user's `accountId`. Never hardcode account IDs.
 - Transition the story to **In Progress** before executing.
+- When all subtasks are complete and the Verification & Wrap-Up subtask passes, transition the story to **In Review** — never Done. Only the `/review` workflow transitions stories to Done.
 
 ### Phase 4 — Build Todo List & Execute
 
@@ -98,7 +99,8 @@ Use Atlassian MCP `createJiraIssue` to create each subtask:
 2. Create a `manage_todo_list` that is an **exact 1:1 mirror** of the Jira subtasks. Each todo title is `HZN-XXXX Summary`.
 3. Execute subtasks sequentially. Follow conventional commit format (`feat(scope):`, `fix(scope):`, `test(scope):`).
 4. Identify which project docs may need updates (README, plan docs, learned-rules) as work proceeds.
-5. **Do NOT push commits** — pushing is a separate workflow (`/push` or `/pr`). The implement flow builds, tests, and verifies.
+5. After all subtasks pass, transition the story to **In Review** via `transitionJiraIssue`. Never transition to Done from the implement flow.
+6. **Do NOT push commits** — pushing is a separate workflow (`/push` or `/pr`). The implement flow builds, tests, and verifies.
 
 ---
 

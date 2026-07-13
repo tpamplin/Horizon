@@ -30,7 +30,7 @@ Horizon stories are often decomposed into subtasks that run in parallel across m
 
 **If a Jira key was provided** (matches `HZN-\d+`):
 
-1. Fetch the story via Atlassian MCP (`getJiraIssue`). If MCP is unavailable, stop and inform the user.
+1. Fetch the story via Atlassian MCP (`getJiraIssue`). If the Atlassian MCP tools are disabled, activate them first by calling `activate_jira_issue_management`. If activation fails, stop and inform the user.
 2. Fetch the parent epic if linked.
 3. Extract from the story:
    - **Acceptance Criteria** — each AC becomes a checklist item in Phase 4

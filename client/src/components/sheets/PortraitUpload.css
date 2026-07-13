@@ -1,0 +1,147 @@
+/* =============================================================================
+   Horizon — PortraitUpload Styles
+   =============================================================================
+   Circular portrait with edit-icon overlay. Click the circle to change.
+   ============================================================================= */
+
+.portrait-upload-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  border-radius: var(--radius-full);
+  overflow: visible;
+  cursor: pointer;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.portrait-upload-circle:hover,
+.portrait-upload-circle:focus-visible {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.portrait-upload-circle:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.portrait-circle-img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.portrait-circle-empty {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  user-select: none;
+}
+
+/* Edit badge — pencil icon overlaying bottom-right */
+.portrait-edit-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-surface);
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Remove badge — appears on hover */
+.portrait-remove-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-surface);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.portrait-upload-circle:hover .portrait-remove-badge {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.portrait-remove-badge:hover {
+  background: #c0392b;
+}
+
+/* Upload spinner overlay */
+.portrait-upload-spinner {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portrait-upload-spinner::after {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: portrait-spin 0.6s linear infinite;
+}
+
+@keyframes portrait-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hidden file input */
+.portrait-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.portrait-upload-error {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--color-error);
+  margin: 0;
+  white-space: nowrap;
+}

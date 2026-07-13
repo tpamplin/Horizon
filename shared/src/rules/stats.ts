@@ -20,6 +20,40 @@ import type { DicePool, RollResult } from './dice.js';
 export type StatKey = 'cognition' | 'force' | 'reflex' | 'conflict' | 'influence' | 'stability';
 
 /**
+ * Die rating values used in the alternate (die-based) Horizon ruleset.
+ */
+export type DieRating = 'D4' | 'D6' | 'D8' | 'D10' | 'D12' | 'D20';
+
+/** All valid die ratings, ordered from smallest to largest. */
+export const DIE_RATINGS: DieRating[] = ['D4', 'D6', 'D8', 'D10', 'D12', 'D20'];
+
+/** Numeric side count for each die rating. Useful for proportional bar fills and ARIA values. */
+export const DIE_SIDES: Record<DieRating, number> = {
+  D4: 4,
+  D6: 6,
+  D8: 8,
+  D10: 10,
+  D12: 12,
+  D20: 20,
+};
+
+/** The stat value format for a given campaign ruleset. */
+export type StatFormat = 'numeric' | 'die';
+
+/**
+ * A parsed stat value — either a plain number or a die rating with optional modifier.
+ */
+export interface ParsedStatValue {
+  format: StatFormat;
+  /** The die rating if format is 'die'. */
+  die?: DieRating;
+  /** Optional modifier (e.g. +2 or -1) applied to the die rating. */
+  modifier?: number;
+  /** The raw numeric value if format is 'numeric'. */
+  value?: number;
+}
+
+/**
  * Metadata for a single stat.
  */
 export interface StatDefinition {
@@ -35,6 +69,10 @@ export interface StatDefinition {
   max: number;
   /** Default starting value for a new character. */
   default: number;
+  /** Which format this stat uses: 'numeric' (0–5) or 'die' (D4–D20). */
+  format: StatFormat;
+  /** Default die rating when using die format. */
+  defaultDie: DieRating;
 }
 
 /**
@@ -50,6 +88,8 @@ export const STATS: Record<StatKey, StatDefinition> = {
     min: 0,
     max: 5,
     default: 0,
+    format: 'numeric',
+    defaultDie: 'D10',
   },
   force: {
     key: 'force',
@@ -58,6 +98,8 @@ export const STATS: Record<StatKey, StatDefinition> = {
     min: 0,
     max: 5,
     default: 0,
+    format: 'numeric',
+    defaultDie: 'D6',
   },
   reflex: {
     key: 'reflex',
@@ -66,6 +108,8 @@ export const STATS: Record<StatKey, StatDefinition> = {
     min: 0,
     max: 5,
     default: 0,
+    format: 'numeric',
+    defaultDie: 'D12',
   },
   conflict: {
     key: 'conflict',
@@ -74,6 +118,8 @@ export const STATS: Record<StatKey, StatDefinition> = {
     min: 0,
     max: 5,
     default: 0,
+    format: 'numeric',
+    defaultDie: 'D8',
   },
   influence: {
     key: 'influence',
@@ -82,6 +128,8 @@ export const STATS: Record<StatKey, StatDefinition> = {
     min: 0,
     max: 5,
     default: 0,
+    format: 'numeric',
+    defaultDie: 'D20',
   },
   stability: {
     key: 'stability',
@@ -90,6 +138,8 @@ export const STATS: Record<StatKey, StatDefinition> = {
     min: 0,
     max: 5,
     default: 0,
+    format: 'numeric',
+    defaultDie: 'D4',
   },
 } as const;
 
@@ -103,6 +153,71 @@ export const STAT_KEYS: StatKey[] = Object.keys(STATS) as StatKey[];
  */
 export function getStatDef(key: string): StatDefinition | undefined {
   return STATS[key as StatKey];
+}
+
+/**
+ * Format a stat value for display.
+ *
+ * Numeric stats return the number as a string (e.g. "3").
+ * Die-rating stats return the die size with optional modifier (e.g. "D10", "D10+2").
+ * Backward-compatible: plain string values like "D10" are returned as-is.
+ *
+ * @param value — The stat value (number like 3, or die string like "D10").
+ * @param modifier — Optional flat modifier to append.
+ * @returns A human-readable stat display string.
+ */
+export function formatStatValue(value: number | string, modifier?: number): string {
+  // Empty / unset — display placeholder
+  if (value === '' || value === null || value === undefined) {
+    return '--';
+  }
+
+  // String values (existing die strings like "D10") — pass through
+  if (typeof value === 'string') {
+    if (modifier && modifier !== 0) {
+      const sign = modifier > 0 ? '+' : '';
+      return `${value}${sign}${modifier}`;
+    }
+    return value;
+  }
+
+  // Numeric values — just the number
+  return String(value);
+}
+
+/**
+ * Parse a display-formatted stat value back into its components.
+ * Accepts strings like "D10", "D10+2", "3", or plain numbers.
+ *
+ * @param value — The stat value as stored (number or die string).
+ * @returns A ParsedStatValue with format, die, modifier, and/or numeric value.
+ */
+export function parseStatValue(value: number | string): ParsedStatValue {
+  if (typeof value === 'number') {
+    return { format: 'numeric', value };
+  }
+
+  // Empty / unset
+  if (value === '' || value === null || value === undefined) {
+    return { format: 'die' };
+  }
+
+  // Try to parse as die rating with optional modifier: "D10", "D10+2", "D8-1"
+  const dieMatch = value.match(/^(D\d+)([+-]\d+)?$/);
+  if (dieMatch) {
+    const die = dieMatch[1] as DieRating;
+    const modifier = dieMatch[2] ? parseInt(dieMatch[2], 10) : undefined;
+    return { format: 'die', die, modifier };
+  }
+
+  // Fallback: try as plain number
+  const num = Number(value);
+  if (!isNaN(num)) {
+    return { format: 'numeric', value: num };
+  }
+
+  // Unknown format — treat as die string
+  return { format: 'die', die: value as DieRating };
 }
 
 /**
@@ -293,4 +408,37 @@ export function checkSuccess(
     roll: finalRoll,
     discardedRoll,
   };
+}
+
+// -----------------------------------------------------------------------------
+// Item Modifier Computation
+// -----------------------------------------------------------------------------
+
+/**
+ * An item modifier from a signature item or special ability.
+ */
+export interface ExternalModifierSource {
+  name: string;
+  modifiers?: { target: 'attribute' | 'skill'; key: string; value: number }[];
+}
+
+/**
+ * Sum all item/ability modifiers that target a specific stat key.
+ * Scans both signature items and special abilities for structuredModifiers.
+ *
+ * @param statKey — The attribute key to sum modifiers for (e.g. "force").
+ * @param items — Array of items with optional structuredModifiers.
+ * @returns The total modifier value (may be negative).
+ */
+export function computeStatModifier(statKey: string, items: ExternalModifierSource[]): number {
+  let total = 0;
+  for (const item of items) {
+    if (!item.modifiers) continue;
+    for (const mod of item.modifiers) {
+      if (mod.target === 'attribute' && mod.key === statKey) {
+        total += mod.value;
+      }
+    }
+  }
+  return total;
 }

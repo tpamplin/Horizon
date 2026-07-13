@@ -211,21 +211,68 @@ export interface CampaignCharacterBrief {
 }
 
 // -----------------------------------------------------------------------------
+// Character API — Request & Response Types
+// -----------------------------------------------------------------------------
+
+/** Payload for POST /api/campaigns/:id/characters. */
+export interface CreateCharacterRequest {
+  /** Character name. Must be at least 2 characters. */
+  name: string;
+  /** Character archetype (e.g. "Pirate Shapeshifter", "Small-Town Sheriff"). */
+  archetype: string;
+  /**
+   * Optional initial sheet data. If not provided, the server uses a default
+   * empty SheetData (all stats at 0, empty arrays, no tokens).
+   */
+  sheetData?: Partial<SheetData>;
+}
+
+/** Payload for PUT /api/characters/:id. */
+export interface UpdateCharacterRequest {
+  /** Full replacement of the character's sheet data. */
+  sheetData: SheetData;
+  /** Optional updated character name. */
+  name?: string;
+  /** Optional updated character archetype. */
+  archetype?: string;
+}
+
+/** Payload for POST /api/campaigns/:id/characters (add character to roster). */
+export interface AddCharacterToCampaignRequest {
+  /** The ID of the character to add from the user's library. */
+  characterId: string;
+}
+
+/**
+ * Join table record — tracks which characters are in which campaigns.
+ * A character can be in multiple campaigns simultaneously.
+ */
+export interface CampaignCharacter {
+  /** The campaign the character is rostered in. */
+  campaignId: string;
+  /** The character added to the campaign. */
+  characterId: string;
+  /** The user who added this character to the campaign. */
+  addedBy: string;
+  /** ISO 8601 timestamp of when the character was added. */
+  addedAt: string;
+}
+
+// -----------------------------------------------------------------------------
 // Characters & NPCs
 // -----------------------------------------------------------------------------
 
 /**
- * A player-controlled character within a campaign.
- * Each character is owned by one player and belongs to exactly one campaign.
+ * A player-controlled character in the user's library.
+ * Characters belong to the player, not a campaign. They can be added to
+ * any campaign the player is a member of via the campaign_characters join table.
  * The sheet_data JSON column stores all stats, inventory, traits, and
  * conditions — see SheetData for the structure.
  */
 export interface Character {
   /** Unique identifier. */
   id: string;
-  /** The campaign this character belongs to. */
-  campaignId: string;
-  /** The user (player) who controls this character. */
+  /** The user (player) who owns this character. */
   playerUserId: string;
   /** Character name (e.g. "Jamie Reyes"). */
   name: string;
@@ -246,15 +293,16 @@ export interface Character {
 }
 
 /**
- * A non-player character (NPC) within a campaign.
- * NPCs can be generated from an archetype template or created manually by the GM.
- * They share the same sheet_data structure as Characters.
+ * A non-player character (NPC) in the user's library.
+ * NPCs belong to the user, not a campaign. They can be added to any campaign
+ * the user is a member of via the campaign_npcs join table.
+ * NPCs can be generated from an archetype template or created manually.
  */
 export interface NPC {
   /** Unique identifier. */
   id: string;
-  /** The campaign this NPC belongs to. */
-  campaignId: string;
+  /** The user who owns this NPC. */
+  playerUserId: string;
   /** Display name (e.g. "Sheriff Collins"). */
   name: string;
   /**
@@ -275,6 +323,44 @@ export interface NPC {
   isGenerated: boolean;
   /** ISO 8601 timestamp of when this NPC was created. */
   createdAt: string;
+}
+
+// -----------------------------------------------------------------------------
+// NPC API — Request & Response Types
+// -----------------------------------------------------------------------------
+
+/** Links an NPC to a campaign via the roster. */
+export interface CampaignNPC {
+  /** The campaign the NPC is added to. */
+  campaignId: string;
+  /** The NPC on the roster. */
+  npcId: string;
+  /** User who added this NPC to the campaign. */
+  addedBy: string;
+  /** ISO 8601 timestamp of when the NPC was added. */
+  addedAt: string;
+}
+
+/** Payload for POST /api/npcs. */
+export interface CreateNPCRequest {
+  /** NPC name. Must be at least 2 characters. */
+  name: string;
+  /** NPC archetype (e.g. "Corrupt Lawman", "Town Bully"). */
+  archetype: string;
+  /** Optional initial sheet data. Merged with defaults if not provided. */
+  sheetData?: Partial<SheetData>;
+}
+
+/** Payload for PUT /api/npcs/:id. */
+export interface UpdateNPCRequest {
+  /** Full replacement of the NPC's sheet data. */
+  sheetData: SheetData;
+}
+
+/** Payload for POST /api/campaigns/:id/npcs — add an NPC to a campaign roster. */
+export interface AddNPCToCampaignRequest {
+  /** The ID of the NPC to add from the user's library. */
+  npcId: string;
 }
 
 // -----------------------------------------------------------------------------
@@ -308,6 +394,44 @@ export interface CharacterStats {
 }
 
 /**
+ * A defining strength or positive character trait with room for description.
+ * Replaces the old plain-string format for richer character expression.
+ *
+ * @example
+ * ```json
+ * {
+ *   "name": "Extremely Loyal",
+ *   "description": "Extremely loyal to those he considers friends. Will go to great lengths to protect them."
+ * }
+ * ```
+ */
+export interface StrengthEntry {
+  /** Short label for the strength. */
+  name: string;
+  /** Full description of the strength and how it manifests. */
+  description: string;
+}
+
+/**
+ * A defining flaw or weakness with room for description.
+ * Replaces the old plain-string format.
+ *
+ * @example
+ * ```json
+ * {
+ *   "name": "Kleptomaniac",
+ *   "description": "Generally steals to re-distribute wealth, but gets the itch if it's been too long."
+ * }
+ * ```
+ */
+export interface FlawEntry {
+  /** Short label for the flaw. */
+  name: string;
+  /** Full description of the flaw and its consequences. */
+  description: string;
+}
+
+/**
  * An item in a character's or NPC's general inventory.
  * For items with mechanical effects, see SignatureItem.
  */
@@ -335,15 +459,102 @@ export interface InventoryItem {
  * }
  * ```
  */
+/** The category of a signature item. */
+export type ItemType = 'weapon' | 'clothing' | 'gear';
+
+/** The attack style for weapon items. */
+export type WeaponType = 'melee' | 'ranged' | 'aoe';
+
+export const ITEM_TYPES: ItemType[] = ['weapon', 'clothing', 'gear'];
+export const WEAPON_TYPES: WeaponType[] = ['melee', 'ranged', 'aoe'];
+
+/** A structured modifier applied by an item — can target an attribute or a skill. */
+export interface ItemModifier {
+  /** Whether this modifies an attribute or a skill. */
+  target: 'attribute' | 'skill';
+  /** The attribute key (e.g. "cognition") or skill key (e.g. "stealth"). */
+  key: string;
+  /** The numeric bonus or penalty applied. */
+  value: number;
+}
+
 export interface SignatureItem {
   /** Display name of the item. */
   name: string;
   /** Flavor or functional description of the item. */
   description: string;
-  /** Mechanical modifiers this item provides (e.g. "+2 to all influence rolls"). */
+  /** Freeform mechanical modifiers text (legacy — prefer structuredModifiers). */
   modifiers?: string;
   /** Additional rules or constraints associated with this item. */
   rules?: string;
+  /** If assigned from library, the template ID this item originated from. */
+  templateId?: string;
+  /** The item category. */
+  itemType?: ItemType;
+  /** For weapons: the attack style. */
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  /** Bonus to attack rolls with this weapon. */
+  attackBonus?: number;
+  /** Bonus to damage with this weapon. */
+  damageBonus?: number;
+  /** Structured attribute and skill modifiers this item provides. */
+  structuredModifiers?: ItemModifier[];
+}
+
+/**
+ * A reusable signature item template stored in the shared library.
+ * Characters pick from these templates to add items to their sheet.
+ */
+export interface SignatureItemTemplate {
+  id: string;
+  name: string;
+  description: string;
+  modifiers?: string;
+  rules?: string;
+  category?: string;
+  itemType?: ItemType;
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  attackBonus?: number;
+  damageBonus?: number;
+  structuredModifiers?: ItemModifier[];
+  createdBy: string;
+  createdAt: string;
+}
+
+/** Payload for POST /api/items/templates. */
+export interface CreateSignatureItemRequest {
+  name: string;
+  description: string;
+  modifiers?: string;
+  rules?: string;
+  category?: string;
+  itemType?: ItemType;
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  attackBonus?: number;
+  damageBonus?: number;
+  structuredModifiers?: ItemModifier[];
+}
+
+/** Payload for PUT /api/items/templates/:id. */
+export interface UpdateSignatureItemRequest {
+  name?: string;
+  description?: string;
+  modifiers?: string;
+  rules?: string;
+  category?: string;
+  itemType?: ItemType;
+  weaponType?: WeaponType;
+  /** For weapons: which attribute governs attack rolls (e.g. "force", "reflex"). */
+  weaponStat?: string;
+  attackBonus?: number;
+  damageBonus?: number;
+  structuredModifiers?: ItemModifier[];
 }
 
 /**
@@ -362,6 +573,34 @@ export interface SpecialAbility {
   name: string;
   /** Description of what the ability does, including mechanical effects and bonuses. */
   effect: string;
+  /** If assigned from library, the template ID this ability originated from. */
+  templateId?: string;
+}
+
+/**
+ * A reusable ability template stored in the shared library.
+ */
+export interface AbilityTemplate {
+  id: string;
+  name: string;
+  effect: string;
+  category?: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+/** Payload for POST /api/abilities/templates. */
+export interface CreateAbilityRequest {
+  name: string;
+  effect: string;
+  category?: string;
+}
+
+/** Payload for PUT /api/abilities/templates/:id. */
+export interface UpdateAbilityRequest {
+  name?: string;
+  effect?: string;
+  category?: string;
 }
 
 /**
@@ -426,14 +665,16 @@ export interface SheetData {
   adversityTokens: number;
   /**
    * Defining strengths and positive character traits.
-   * Freeform strings describing what the character excels at.
+   * Each entry has a short name and full description.
+   * Backward-compatible: plain strings are treated as { name: string, description: '' }.
    */
-  strengths: string[];
+  strengths: (string | StrengthEntry)[];
   /**
    * Defining flaws, weaknesses, or negative character traits.
-   * Freeform strings describing the character's shortcomings.
+   * Each entry has a short name and full description.
+   * Backward-compatible: plain strings are treated as { name: string, description: '' }.
    */
-  flaws: string[];
+  flaws: (string | FlawEntry)[];
   /**
    * General character traits (e.g. "Brave", "Clumsy").
    * For structured strengths/flaws, use the dedicated fields above.
