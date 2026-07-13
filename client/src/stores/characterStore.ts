@@ -103,7 +103,7 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
     });
   },
 
-  updateCharacter: async (campaignId, characterId, sheetData) => {
+  updateCharacter: async (_campaignId, characterId, sheetData) => {
     // Snapshot the previous character for rollback
     const previous = get().currentCharacter;
     set({ saveState: 'saving' });
@@ -116,10 +116,9 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
     }
 
     try {
-      const updated = await api.put<Character>(
-        `/api/campaigns/${campaignId}/characters/${characterId}`,
-        { sheetData },
-      );
+      // Use the library-level PUT endpoint (characters are owned per-user, not per-campaign)
+      // campaignId is accepted for forward-compat but not used in the URL
+      const updated = await api.put<Character>(`/api/characters/${characterId}`, { sheetData });
       set({ currentCharacter: updated, saveState: 'saved', isDirty: false });
     } catch (err) {
       // Rollback on error — keep dirty flag true so user can retry

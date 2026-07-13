@@ -283,7 +283,7 @@ describe('characterStore', () => {
 
       await useCharacterStore.getState().updateCharacter('camp-1', 'char-1', updatedSheet);
 
-      expect(mockPut).toHaveBeenCalledWith('/api/campaigns/camp-1/characters/char-1', {
+      expect(mockPut).toHaveBeenCalledWith('/api/characters/char-1', {
         sheetData: updatedSheet,
       });
     });
