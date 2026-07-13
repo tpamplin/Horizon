@@ -7,6 +7,7 @@ import { CampaignListPage } from './components/campaigns/CampaignListPage.js';
 import { CampaignLayout } from './components/campaigns/CampaignLayout.js';
 import { SheetView } from './components/sheets/SheetView.js';
 import { CharacterLibraryPage } from './components/sheets/CharacterLibraryPage.js';
+import { NewCharacterPage } from './components/sheets/NewCharacterPage.js';
 import { NPCLibraryPage } from './components/sheets/NPCLibraryPage.js';
 import { HomePage } from './components/home/HomePage.js';
 import { useAuthStore } from './stores/authStore.js';
@@ -67,6 +68,14 @@ export function App() {
           element={
             <AuthGuard>
               <CharacterLibraryPage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/characters/new"
+          element={
+            <AuthGuard>
+              <NewCharacterPage />
             </AuthGuard>
           }
         />

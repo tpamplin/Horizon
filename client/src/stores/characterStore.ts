@@ -33,7 +33,13 @@ export interface CharacterState {
   /** Clear all character state (e.g. on campaign switch). */
   clearCharacters: () => void;
   /** Update character sheet data via PUT. Optimistic update with rollback. */
-  updateCharacter: (campaignId: string, characterId: string, sheetData: SheetData) => Promise<void>;
+  updateCharacter: (
+    campaignId: string,
+    characterId: string,
+    sheetData: SheetData,
+    name?: string,
+    archetype?: string,
+  ) => Promise<void>;
   /** Set the save lifecycle state. */
   setSaveState: (state: SaveState) => void;
   /** Mark the current character as having unsaved changes. */
@@ -45,7 +51,11 @@ export interface CharacterState {
   /** Fetch the authenticated user's character library (GET /api/characters). */
   fetchMyCharacters: () => Promise<void>;
   /** Create a new character in the user's library (POST /api/characters). */
-  createCharacter: (name: string, archetype: string) => Promise<Character>;
+  createCharacter: (
+    name: string,
+    archetype: string,
+    sheetData?: Partial<SheetData>,
+  ) => Promise<Character>;
   /** Delete a character from the user's library (DELETE /api/characters/:id). */
   deleteCharacter: (characterId: string) => Promise<void>;
   /** Add a character from the library to a campaign roster. */
@@ -103,7 +113,7 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
     });
   },
 
-  updateCharacter: async (_campaignId, characterId, sheetData) => {
+  updateCharacter: async (_campaignId, characterId, sheetData, name, archetype) => {
     // Snapshot the previous character for rollback
     const previous = get().currentCharacter;
     set({ saveState: 'saving' });
@@ -111,14 +121,21 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
     // Optimistic update
     if (previous && previous.id === characterId) {
       set({
-        currentCharacter: { ...previous, sheetData },
+        currentCharacter: {
+          ...previous,
+          sheetData,
+          ...(name !== undefined ? { name } : {}),
+          ...(archetype !== undefined ? { archetype } : {}),
+        },
       });
     }
 
     try {
       // Use the library-level PUT endpoint (characters are owned per-user, not per-campaign)
-      // campaignId is accepted for forward-compat but not used in the URL
-      const updated = await api.put<Character>(`/api/characters/${characterId}`, { sheetData });
+      const body: Record<string, unknown> = { sheetData };
+      if (name !== undefined) body.name = name;
+      if (archetype !== undefined) body.archetype = archetype;
+      const updated = await api.put<Character>(`/api/characters/${characterId}`, body);
       set({ currentCharacter: updated, saveState: 'saved', isDirty: false });
     } catch (err) {
       // Rollback on error — keep dirty flag true so user can retry
@@ -164,8 +181,10 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
     }
   },
 
-  createCharacter: async (name, archetype) => {
-    const character = await api.post<Character>('/api/characters', { name, archetype });
+  createCharacter: async (name, archetype, sheetData) => {
+    const body: Record<string, unknown> = { name, archetype };
+    if (sheetData) body.sheetData = sheetData;
+    const character = await api.post<Character>('/api/characters', body);
     set((s) => ({ campaignCharacters: [...s.campaignCharacters, character] }));
     return character;
   },

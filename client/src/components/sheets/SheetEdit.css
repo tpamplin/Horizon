@@ -35,6 +35,56 @@
   min-width: 0;
 }
 
+/* Name & archetype inline editing */
+.sheet-edit-name-row,
+.sheet-edit-archetype-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.sheet-edit-name-input {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  width: 100%;
+  max-width: 400px;
+}
+
+.sheet-edit-archetype-input {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  width: 100%;
+  max-width: 300px;
+}
+
+.sheet-edit-inline-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sheet-edit-inline-btn:hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-accent);
+}
+
+.sheet-edit-inline-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
 .sheet-edit-name {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);

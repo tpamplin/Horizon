@@ -6,7 +6,7 @@
 // inventory, abilities, conditions, tracks, backstory, and notes.
 // =============================================================================
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCharacterStore } from '../../stores/characterStore.js';
 import { SheetEdit } from './SheetEdit.js';
@@ -25,6 +25,7 @@ export function SheetView() {
   const currentCharacter = useCharacterStore((s) => s.currentCharacter);
   const fetchCharacter = useCharacterStore((s) => s.fetchCharacter);
   const updateCharacter = useCharacterStore((s) => s.updateCharacter);
+  const deleteCharacter = useCharacterStore((s) => s.deleteCharacter);
   const setPortrait = useCharacterStore((s) => s.setPortrait);
   const saveState = useCharacterStore((s) => s.saveState);
   const loading = useCharacterStore((s) => s.loading);
@@ -35,6 +36,9 @@ export function SheetView() {
 
   const [editMode, setEditMode] = useState(false);
   const [backstoryOpen, setBackstoryOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const deleteModalRef = useRef<HTMLDivElement>(null);
 
   // Fetch character on mount
   useEffect(() => {
@@ -44,6 +48,41 @@ export function SheetView() {
     // Reset edit mode when changing characters
     setEditMode(false);
   }, [campaignId, characterId, fetchCharacter]);
+
+  // Focus trap for delete confirmation modal
+  useEffect(() => {
+    if (!showDeleteModal) return;
+    const modal = deleteModalRef.current;
+    if (!modal) return;
+    const timer = setTimeout(() => {
+      const cancelBtn = modal.querySelector<HTMLElement>('button:not(.delete-confirm-btn)');
+      cancelBtn?.focus();
+    }, 50);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowDeleteModal(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showDeleteModal]);
+
+  const handleDelete = async () => {
+    if (!characterId) return;
+    setDeleting(true);
+    try {
+      await deleteCharacter(characterId);
+      navigate(campaignId ? `/campaigns/${campaignId}` : '/characters', { replace: true });
+    } catch {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
 
   // Loading state
   if (loading) {
@@ -89,9 +128,9 @@ export function SheetView() {
         character={char}
         saveState={saveState}
         isGM={isGM}
-        onSave={(data: SheetData) => {
+        onSave={(data: SheetData, name?: string, archetype?: string) => {
           if (characterId) {
-            updateCharacter(campaignId ?? '', characterId, data);
+            updateCharacter(campaignId ?? '', characterId, data, name, archetype);
           }
         }}
         onPortraitChange={(url: string) => {
@@ -134,14 +173,59 @@ export function SheetView() {
           <h1 className="sheet-name">{char.name}</h1>
           <p className="sheet-archetype">{char.archetype}</p>
         </div>
-        <button
-          type="button"
-          className="sheet-edit-btn"
-          onClick={() => setEditMode(true)}
-        >
-          Edit
-        </button>
+        <div className="sheet-header-actions">
+          <button
+            type="button"
+            className="sheet-edit-btn"
+            onClick={() => setEditMode(true)}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="sheet-delete-btn"
+            onClick={() => setShowDeleteModal(true)}
+            aria-label={`Delete ${char.name}`}
+          >
+            Delete
+          </button>
+        </div>
       </header>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div
+          className="discard-overlay"
+          role="alertdialog"
+          aria-label="Confirm delete character"
+          aria-modal="true"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowDeleteModal(false); }}
+          ref={deleteModalRef}
+        >
+          <div className="discard-modal">
+            <h2>Delete {char.name}?</h2>
+            <p>This will permanently delete this character and remove them from all campaigns. This action cannot be undone.</p>
+            <div className="discard-modal-actions">
+              <button
+                type="button"
+                className="discard-discard-btn delete-confirm-btn"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting…' : 'Delete Permanently'}
+              </button>
+              <button
+                type="button"
+                className="discard-keep-btn"
+                onClick={() => setShowDeleteModal(false)}
+                autoFocus
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ---- Attributes + Adversity Strip ---- */}
       <section className="sheet-section sheet-attrs-tokens" aria-label="Character attributes and adversity tokens">
@@ -175,7 +259,7 @@ export function SheetView() {
                   <li key={`${item.name}-${i}`} className="sig-item">
                     <strong className="sig-item-name">
                       {item.name}
-                      {item.templateId && <span className="lib-badge" title="From Library">📋</span>}
+                      {item.templateId && <span className="lib-badge" title="From Library" aria-label="From Library">📋</span>}
                     </strong>
                     <p className="sig-item-desc">{item.description}</p>
                     {item.modifiers && <p className="sig-item-mod"><em>{item.modifiers}</em></p>}
@@ -195,7 +279,7 @@ export function SheetView() {
                   <li key={`${ab.name}-${i}`} className="ability-item">
                     <strong className="ability-name">
                       {ab.name}
-                      {ab.templateId && <span className="lib-badge" title="From Library">📋</span>}
+                      {ab.templateId && <span className="lib-badge" title="From Library" aria-label="From Library">📋</span>}
                     </strong>
                     <p className="ability-effect">{ab.effect}</p>
                   </li>

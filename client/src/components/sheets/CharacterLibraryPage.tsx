@@ -15,35 +15,13 @@ export function CharacterLibraryPage() {
   const navigate = useNavigate();
   const characters = useCharacterStore((s) => s.campaignCharacters);
   const fetchMyCharacters = useCharacterStore((s) => s.fetchMyCharacters);
-  const createCharacter = useCharacterStore((s) => s.createCharacter);
   const deleteCharacter = useCharacterStore((s) => s.deleteCharacter);
   const loading = useCharacterStore((s) => s.loading);
   const error = useCharacterStore((s) => s.error);
 
-  const [createOpen, setCreateOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [archetype, setArchetype] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
   useEffect(() => {
     fetchMyCharacters();
   }, [fetchMyCharacters]);
-
-  const handleCreate = useCallback(async () => {
-    if (!name.trim()) return;
-    setSubmitting(true);
-    try {
-      const ch = await createCharacter(name.trim(), archetype.trim() || 'custom');
-      setCreateOpen(false);
-      setName('');
-      setArchetype('');
-      navigate(`/characters/${ch.id}`);
-    } catch {
-      // Error handled by store
-    } finally {
-      setSubmitting(false);
-    }
-  }, [name, archetype, createCharacter, navigate]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -56,13 +34,6 @@ export function CharacterLibraryPage() {
     [deleteCharacter],
   );
 
-  const handleKeyCreate = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') handleCreate();
-    },
-    [handleCreate],
-  );
-
   return (
     <div className="char-library">
       <header className="char-library-header">
@@ -70,45 +41,12 @@ export function CharacterLibraryPage() {
           ← Back to Dashboard
         </button>
         <h1>My Characters</h1>
-        <button className="char-library-create-btn" onClick={() => setCreateOpen(true)}>
+        <button className="char-library-create-btn" onClick={() => navigate('/characters/new')}>
           + New Character
         </button>
       </header>
 
       {error && <p className="char-library-error" role="alert">{error}</p>}
-
-      {createOpen && (
-        <div className="char-library-create-modal" role="dialog" aria-label="Create character">
-          <h2>Create Character</h2>
-          <label>
-            Name
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={handleKeyCreate}
-              placeholder="Character name"
-              autoFocus
-            />
-          </label>
-          <label>
-            Archetype
-            <input
-              value={archetype}
-              onChange={(e) => setArchetype(e.target.value)}
-              onKeyDown={handleKeyCreate}
-              placeholder="e.g. Warrior, Mystic, Rogue"
-            />
-          </label>
-          <div className="char-library-create-actions">
-            <button onClick={handleCreate} disabled={submitting || !name.trim()}>
-              {submitting ? 'Creating…' : 'Create'}
-            </button>
-            <button className="char-library-cancel" onClick={() => setCreateOpen(false)}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
 
       {loading && <p className="char-library-loading">Loading…</p>}
 

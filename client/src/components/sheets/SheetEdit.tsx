@@ -11,7 +11,6 @@ import type {
   Character,
   SheetData,
   StatKey,
-  DieRating,
   SignatureItem,
   SpecialAbility,
   TrackModifier,
@@ -35,9 +34,13 @@ export interface SheetEditProps {
   character: Character;
   saveState: SaveState;
   isGM: boolean;
-  onSave: (sheetData: SheetData) => void;
+  onSave: (sheetData: SheetData, name?: string, archetype?: string) => void;
   onPortraitChange: (url: string) => void;
   onDone: () => void;
+  /** If true, this is a new character — Save creates it then navigates. */
+  isNew?: boolean;
+  /** Called on save for new characters — provides name/archetype/sheetData. */
+  onCreate?: (name: string, archetype: string, sheetData: SheetData) => Promise<Character>;
 }
 
 const SAVE_DEBOUNCE_MS = 300;
@@ -236,7 +239,7 @@ function StatModAddMenu({
 // Component
 // -----------------------------------------------------------------------------
 
-export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange, onDone }: SheetEditProps) {
+export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange, onDone, isNew: _isNew, onCreate: _onCreate }: SheetEditProps) {
   const [sheetData, setSheetData] = useState<SheetData>(
     () => structuredClone(character.sheetData) as SheetData,
   );
@@ -246,6 +249,25 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
   const editRef = useRef<HTMLDivElement>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const discardModalRef = useRef<HTMLDivElement>(null);
+
+  // Editable name & archetype
+  const [editingName, setEditingName] = useState(false);
+  const [editingArchetype, setEditingArchetype] = useState(false);
+  const [localName, setLocalName] = useState(character.name);
+  const [localArchetype, setLocalArchetype] = useState(character.archetype);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const archetypeInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus name/archetype inputs when editing starts
+  useEffect(() => {
+    if (editingName) nameInputRef.current?.focus();
+  }, [editingName]);
+  useEffect(() => {
+    if (editingArchetype) archetypeInputRef.current?.focus();
+  }, [editingArchetype]);
+
+  const nameChanged = localName !== character.name;
+  const archetypeChanged = localArchetype !== character.archetype;
 
   // Focus the first input on mount
   useEffect(() => {
@@ -307,16 +329,17 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
     setIsDirty((prev) => prev ? prev : true);
   }, []);
 
-  // Track which dice are in conflict (assigned to more than one stat)
+  // Track which dice are in conflict (assigned to more than one stat).
+  // Blank/unset dice are never considered conflicting.
   const dieConflicts = useMemo(() => {
-    const counts = new Map<DieRating, number>();
+    const counts = new Map<string, number>();
     for (const k of STAT_KEYS) {
       const p = parseStatValue(sheetData.stats[k]);
       if (p.format === 'die' && p.die) {
         counts.set(p.die, (counts.get(p.die) ?? 0) + 1);
       }
     }
-    const conflicts = new Set<DieRating>();
+    const conflicts = new Set<string>();
     for (const [die, count] of counts) {
       if (count > 1) conflicts.add(die);
     }
@@ -336,10 +359,14 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
     }
     setIsDirty(false);
     setSaveMsg('Saved');
-    onSave(sheetData);
+    onSave(
+      sheetData,
+      nameChanged ? localName : undefined,
+      archetypeChanged ? localArchetype : undefined,
+    );
     // Brief delay so user sees "Saved" before returning to view
     setTimeout(() => onDone(), 400);
-  }, [sheetData, onSave, onDone, dieConflicts]);
+  }, [sheetData, onSave, onDone, dieConflicts, nameChanged, localName, archetypeChanged, localArchetype]);
 
   // Cancel: show discard modal if dirty, else return immediately
   const handleCancel = useCallback(() => {
@@ -357,8 +384,8 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
         // Check conflicts on the latest sheetData at save time
-        const conflicts = new Set<DieRating>();
-        const counts = new Map<DieRating, number>();
+        const conflicts = new Set<string>();
+        const counts = new Map<string, number>();
         for (const k of STAT_KEYS) {
           const p = parseStatValue(updated.stats[k]);
           if (p.format === 'die' && p.die) {
@@ -393,8 +420,9 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
     scheduleSave(updated);
   };
 
-  // Change stat die rating — allow duplicates locally, block save on conflict
-  const changeStatDie = (key: StatKey, newDie: DieRating) => {
+  // Change stat die rating — allow duplicates locally, block save on conflict.
+  // Pass empty string to clear the die selection.
+  const changeStatDie = (key: StatKey, newDie: string) => {
     const updated: SheetData = {
       ...sheetData,
       stats: { ...sheetData.stats, [key]: newDie },
@@ -660,8 +688,54 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
           currentUrl={character.portraitUrl}
         />
         <div className="sheet-edit-header-text">
-          <h1 className="sheet-edit-name">{character.name}</h1>
-          <p className="sheet-edit-archetype">{character.archetype}</p>
+          {/* Editable name */}
+          <div className="sheet-edit-name-row">
+            {editingName ? (
+              <input
+                ref={nameInputRef}
+                className="edit-input sheet-edit-name-input"
+                value={localName}
+                onChange={(e) => { setLocalName(e.target.value); markDirty(); }}
+                onBlur={() => setEditingName(false)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setEditingName(false); if (e.key === 'Escape') { setLocalName(character.name); setEditingName(false); } }}
+                aria-label="Character name"
+              />
+            ) : (
+              <h1 className="sheet-edit-name">{localName || 'Unnamed'}</h1>
+            )}
+            <button
+              type="button"
+              className="sheet-edit-inline-btn"
+              onClick={() => setEditingName(!editingName)}
+              aria-label={editingName ? 'Done editing name' : 'Edit character name'}
+            >
+              {editingName ? '✓' : '✏️'}
+            </button>
+          </div>
+          {/* Editable archetype */}
+          <div className="sheet-edit-archetype-row">
+            {editingArchetype ? (
+              <input
+                ref={archetypeInputRef}
+                className="edit-input sheet-edit-archetype-input"
+                value={localArchetype}
+                onChange={(e) => { setLocalArchetype(e.target.value); markDirty(); }}
+                onBlur={() => setEditingArchetype(false)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setEditingArchetype(false); if (e.key === 'Escape') { setLocalArchetype(character.archetype); setEditingArchetype(false); } }}
+                aria-label="Character archetype"
+              />
+            ) : (
+              <p className="sheet-edit-archetype">{localArchetype || 'No archetype'}</p>
+            )}
+            <button
+              type="button"
+              className="sheet-edit-inline-btn"
+              onClick={() => setEditingArchetype(!editingArchetype)}
+              aria-label={editingArchetype ? 'Done editing archetype' : 'Edit character archetype'}
+            >
+              {editingArchetype ? '✓' : '✏️'}
+            </button>
+          </div>
         </div>
         <div className="sheet-edit-actions">
           <span className={`save-indicator save-${saveState}`} aria-live="polite">
@@ -723,7 +797,7 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
               const parsed = parseStatValue(value);
               const isDie = parsed.format === 'die';
               const numVal = typeof value === 'number' ? value : 0;
-              const dieVal = (parsed.format === 'die' && parsed.die) ? parsed.die : def?.defaultDie ?? 'D10';
+              const dieVal = (parsed.format === 'die' && parsed.die) ? parsed.die : '';
               // Computed modifier from items only (no manual input)
               const computedMod = itemModifiers
                 .filter(m => m.key === key)
@@ -740,10 +814,11 @@ export function SheetEdit({ character, saveState, isGM, onSave, onPortraitChange
                         <select
                           className={`edit-stat-die-select${dieConflicts.has(dieVal) ? ' die-conflict' : ''}`}
                           value={dieVal}
-                          onChange={(e) => changeStatDie(key, e.target.value as DieRating)}
+                          onChange={(e) => changeStatDie(key, e.target.value)}
                           aria-label={`Die rating for ${def?.name ?? key}`}
                           aria-invalid={dieConflicts.has(dieVal) ? 'true' : undefined}
                         >
+                          <option value="">--</option>
                           {DIE_RATINGS.map((d) => (
                             <option key={d} value={d}>
                               {d}

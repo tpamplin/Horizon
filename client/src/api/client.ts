@@ -102,7 +102,6 @@ async function request<T = unknown>(
   const { accessToken } = useAuthStore.getState();
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...extraHeaders,
   };
 
@@ -116,6 +115,7 @@ async function request<T = unknown>(
   };
 
   if (body !== undefined && method !== 'GET') {
+    headers['Content-Type'] = 'application/json';
     fetchOptions.body = JSON.stringify(body);
   }
 
