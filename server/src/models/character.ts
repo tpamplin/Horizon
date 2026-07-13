@@ -57,7 +57,9 @@ const stmtFindByUserId = db.prepare(`
 
 const stmtUpdateSheet = db.prepare(`
   UPDATE characters
-  SET sheet_data = @sheetData
+  SET sheet_data = @sheetData,
+      name = COALESCE(@name, name),
+      archetype = COALESCE(@archetype, archetype)
   WHERE id = @id
 `);
 
@@ -112,8 +114,18 @@ export function findByUserId(userId: string): CharacterRow[] {
   return stmtFindByUserId.all(userId) as CharacterRow[];
 }
 
-export function updateSheet(characterId: string, sheetDataJson: string): CharacterRow {
-  stmtUpdateSheet.run({ id: characterId, sheetData: sheetDataJson });
+export function updateSheet(
+  characterId: string,
+  sheetDataJson: string,
+  name?: string,
+  archetype?: string,
+): CharacterRow {
+  stmtUpdateSheet.run({
+    id: characterId,
+    sheetData: sheetDataJson,
+    name: name ?? null,
+    archetype: archetype ?? null,
+  });
   return stmtFindById.get(characterId) as CharacterRow;
 }
 

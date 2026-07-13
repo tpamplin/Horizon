@@ -30,15 +30,15 @@ import type {
 // Constants
 // -----------------------------------------------------------------------------
 
-/** Default empty sheet data applied when no initial data is provided. Stats use die-rating format. */
+/** Default empty sheet data applied when no initial data is provided. All stats unset by default. */
 export const DEFAULT_SHEET_DATA: SheetData = {
   stats: {
-    cognition: 'D10',
-    force: 'D6',
-    reflex: 'D12',
-    conflict: 'D8',
-    influence: 'D20',
-    stability: 'D4',
+    cognition: '',
+    force: '',
+    reflex: '',
+    conflict: '',
+    influence: '',
+    stability: '',
   },
   adversityTokens: 0,
   strengths: [],
@@ -142,7 +142,7 @@ export function listUserCharacters(userId: string): Character[] {
   return findByUserId(userId).map(toCharacter);
 }
 
-/** Update a character's sheet data. Owner-only. */
+/** Update a character's sheet data and optionally name/archetype. Owner-only. */
 export function updateSheet(
   userId: string,
   characterId: string,
@@ -153,7 +153,12 @@ export function updateSheet(
   if (row.player_user_id !== userId) {
     throw new CharacterAuthorizationError('You can only edit your own characters.');
   }
-  const updatedRow = updateSheetInDb(characterId, JSON.stringify(input.sheetData));
+  const updatedRow = updateSheetInDb(
+    characterId,
+    JSON.stringify(input.sheetData),
+    input.name,
+    input.archetype,
+  );
   return toCharacter(updatedRow);
 }
 

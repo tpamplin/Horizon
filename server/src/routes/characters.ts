@@ -49,6 +49,8 @@ const updateCharacterSchema = {
     required: ['sheetData'],
     properties: {
       sheetData: { type: 'object' },
+      name: { type: 'string', minLength: 2 },
+      archetype: { type: 'string', minLength: 1 },
     },
     additionalProperties: false,
   },
@@ -91,13 +93,11 @@ function requireCampaignMembership(
   const userId = requireAuth(request, reply);
   if (!userId) return null;
   if (!findMembership(campaignId, userId)) {
-    reply
-      .status(404)
-      .send({
-        error: 'Not Found',
-        message: `Campaign "${campaignId}" not found.`,
-        statusCode: 404,
-      });
+    reply.status(404).send({
+      error: 'Not Found',
+      message: `Campaign "${campaignId}" not found.`,
+      statusCode: 404,
+    });
     return null;
   }
   return userId;
