@@ -272,8 +272,9 @@
 
 .tokens-display {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-sm);
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
   padding: var(--space-sm) 0;
 }
 
@@ -285,8 +286,10 @@
 }
 
 .tokens-label {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.2;
 }
 
 /* -----------------------------------------------------------------------------
@@ -522,4 +525,141 @@
   line-height: var(--line-height-relaxed);
   white-space: pre-wrap;
   margin: var(--space-sm) 0 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Back Navigation (moved above header)
+   ----------------------------------------------------------------------------- */
+
+.sheet-back-top {
+  display: inline-block;
+  margin-bottom: var(--space-sm);
+}
+
+/* -----------------------------------------------------------------------------
+   Attributes + Adversity Strip
+   ----------------------------------------------------------------------------- */
+
+.sheet-attrs-tokens {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.sheet-attrs-tokens .attr-grid {
+  flex: 1;
+  min-width: 280px;
+}
+
+.sheet-attrs-tokens .tokens-display {
+  flex-shrink: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Strength & Flaw Internal Grid
+   ----------------------------------------------------------------------------- */
+
+.strength-flaw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+@media (max-width: 480px) {
+  .strength-flaw-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.empty-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* -----------------------------------------------------------------------------
+   Special Mechanics Placeholder
+   ----------------------------------------------------------------------------- */
+
+.sheet-section-mechanics {
+  border-left: 3px solid var(--color-accent);
+  opacity: 0.7;
+}
+
+.mechanics-placeholder {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* =============================================================================
+   Responsive — Mobile & Tablet
+   ============================================================================= */
+
+/* Tablet and below: single-column body */
+@media (max-width: 640px) {
+  .sheet-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile: tighter padding */
+@media (max-width: 480px) {
+  .sheet-view {
+    padding: var(--space-sm);
+  }
+
+  .sheet-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-sm);
+  }
+
+  .sheet-edit-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sheet-back-top {
+    display: block;
+    width: 100%;
+  }
+
+  /* Stack attributes above tokens */
+  .sheet-attrs-tokens {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+  }
+
+  .sheet-attrs-tokens .attr-grid {
+    min-width: 0;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .tokens-display {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
+  .tokens-label {
+    font-size: var(--font-size-sm);
+  }
+
+  /* Sig items & abilities: full width */
+  .sig-item,
+  .ability-item {
+    padding: var(--space-xs) 0;
+  }
+
+  /* Expand toggle: full width */
+  .expand-toggle {
+    width: 100%;
+    text-align: left;
+  }
 }

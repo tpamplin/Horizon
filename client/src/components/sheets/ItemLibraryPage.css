@@ -1,6 +1,26 @@
 /* Item Template Library */
 .item-library { padding: var(--space-xl); max-width: 960px; margin: 0 auto; }
-.item-library-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); }
+.item-library-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg); gap: var(--space-md); flex-wrap: wrap; }
+
+.item-library-header .sheet-back-btn {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background var(--transition-fast);
+}
+
+.item-library-header .sheet-back-btn:hover {
+  background: var(--color-surface-raised);
+}
+
+.item-library-header .sheet-back-btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
 .item-library-header h1 { margin: 0; font-size: var(--font-size-xl); }
 
 .item-library-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-md); }

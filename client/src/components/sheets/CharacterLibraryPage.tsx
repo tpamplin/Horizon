@@ -66,6 +66,9 @@ export function CharacterLibraryPage() {
   return (
     <div className="char-library">
       <header className="char-library-header">
+        <button className="sheet-back-btn" onClick={() => navigate('/')} aria-label="Back to Dashboard">
+          ← Back to Dashboard
+        </button>
         <h1>My Characters</h1>
         <button className="char-library-create-btn" onClick={() => setCreateOpen(true)}>
           + New Character

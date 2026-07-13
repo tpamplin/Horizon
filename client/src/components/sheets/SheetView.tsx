@@ -90,8 +90,8 @@ export function SheetView() {
         saveState={saveState}
         isGM={isGM}
         onSave={(data: SheetData) => {
-          if (campaignId && characterId) {
-            updateCharacter(campaignId, characterId, data);
+          if (characterId) {
+            updateCharacter(campaignId ?? '', characterId, data);
           }
         }}
         onPortraitChange={(url: string) => {
@@ -103,10 +103,22 @@ export function SheetView() {
   }
 
   // View mode — render SheetView
-  const { stats, adversityTokens, strengths, flaws, traits, inventory, signatureItems, specialAbilities, conditions, customTracks, backstory, notes, campaignNotes } = sheetData;
+  const { stats, adversityTokens, strengths, flaws, signatureItems, specialAbilities, customTracks, backstory, campaignNotes } = sheetData;
 
   return (
     <article className="sheet-view" aria-label={`Character sheet for ${char.name}`}>
+      {/* ---- Back Navigation ---- */}
+      {!editMode && (
+        <button
+          type="button"
+          className="sheet-back-btn sheet-back-top"
+          onClick={() => navigate(campaignId ? `/campaigns/${campaignId}` : '/characters')}
+          aria-label={campaignId ? 'Back to campaign' : 'Back to character library'}
+        >
+          ← Back
+        </button>
+      )}
+
       {/* ---- Header: Portrait + Name ---- */}
       <header className="sheet-header">
         <div className="sheet-portrait">
@@ -131,124 +143,34 @@ export function SheetView() {
         </button>
       </header>
 
-      {/* ---- Two-Column Body ---- */}
-      <div className="sheet-body">
-        {/* ---- Left Column ---- */}
-        <div className="sheet-col">
-
-          {/* Attributes */}
-          <section className="sheet-section" aria-label="Character attributes">
-            <h2 className="section-title">Attributes</h2>
-            <div className="attr-grid">
-              {STAT_KEYS.map((statKey: StatKey) => {
-                const statDef = getStatDef(statKey);
-                const value = stats[statKey] ?? 0;
-                const displayValue = formatStatValue(value);
-                return (
-                  <div key={statKey} className="attr-card">
-                    <span className="attr-die">{displayValue}</span>
-                    <span className="attr-label">{statDef?.name ?? statKey}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Adversity Tokens */}
-          <section className="sheet-section" aria-label="Adversity tokens">
-            <h2 className="section-title">Adversity Tokens</h2>
-            <div className="tokens-display" aria-label={`${adversityTokens} adversity tokens`}>
-              <span className="tokens-count">{adversityTokens}</span>
-              <span className="tokens-label">tokens</span>
-            </div>
-          </section>
-
-          {/* Strengths & Flaws */}
-          {(strengths.length > 0 || flaws.length > 0) && (
-            <section className="sheet-section" aria-label="Strengths and flaws">
-              {strengths.length > 0 && (
-                <div className="strength-list">
-                  <h3 className="subsection-title">Strengths</h3>
-                  <ul className="trait-entry-list" aria-label="Strengths">
-                    {strengths.map((s, i) => {
-                      const entry = typeof s === 'string' ? { name: s, description: '' } : s;
-                      return (
-                        <li key={`str-${i}`} className="trait-entry trait-strength">
-                          <RichTraitView entry={entry} />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-              {flaws.length > 0 && (
-                <div className="flaw-list">
-                  <h3 className="subsection-title">Flaws</h3>
-                  <ul className="trait-entry-list" aria-label="Flaws">
-                    {flaws.map((f, i) => {
-                      const entry = typeof f === 'string' ? { name: f, description: '' } : f;
-                      return (
-                        <li key={`flw-${i}`} className="trait-entry trait-flaw">
-                          <RichTraitView entry={entry} />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* Traits */}
-          {traits.length > 0 && (
-            <section className="sheet-section" aria-label="Traits">
-              <h2 className="section-title">Traits</h2>
-              <ul className="tag-list" aria-label="Character traits">
-                {traits.map((t) => (
-                  <li key={t} className="tag tag-trait">{t}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* Conditions */}
-          {conditions.length > 0 && (
-            <section className="sheet-section" aria-label="Conditions">
-              <h2 className="section-title">Conditions</h2>
-              <ul className="tag-list" aria-label="Active conditions">
-                {conditions.map((c) => (
-                  <li key={c} className="tag tag-condition">{c}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
+      {/* ---- Attributes + Adversity Strip ---- */}
+      <section className="sheet-section sheet-attrs-tokens" aria-label="Character attributes and adversity tokens">
+        <div className="attr-grid">
+          {STAT_KEYS.map((statKey: StatKey) => {
+            const statDef = getStatDef(statKey);
+            const value = stats[statKey] ?? 0;
+            const displayValue = formatStatValue(value);
+            return (
+              <div key={statKey} className="attr-card">
+                <span className="attr-die">{displayValue}</span>
+                <span className="attr-label">{statDef?.name ?? statKey}</span>
+              </div>
+            );
+          })}
         </div>
+        <div className="tokens-display" aria-label={`${adversityTokens} adversity tokens`}>
+          <span className="tokens-count">{adversityTokens}</span>
+          <span className="tokens-label">Adversity Tokens</span>
+        </div>
+      </section>
 
-        {/* ---- Right Column ---- */}
+      {/* ---- Two Columns: Items (left) / Abilities (right) ---- */}
+      <div className="sheet-body">
         <div className="sheet-col">
-
-          {/* Inventory */}
-          {inventory.length > 0 && (
-            <section className="sheet-section" aria-label="Inventory">
-              <h2 className="section-title">Inventory</h2>
-              <ul className="inventory-list" aria-label="Inventory items">
-                {inventory.map((item, i) => (
-                  <li key={`${item.name}-${i}`} className="inventory-item">
-                    <span className="inv-name">{item.name}</span>
-                    {item.qty > 1 && <span className="inv-qty">×{item.qty}</span>}
-                    {item.notes && <span className="inv-notes">{item.notes}</span>}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* Signature Items */}
           {signatureItems.length > 0 && (
             <section className="sheet-section" aria-label="Signature items">
               <h2 className="section-title">Signature Items</h2>
-              <ul className="sig-items-list" aria-label="Signature items">
+              <ul className="sig-items-list">
                 {signatureItems.map((item, i) => (
                   <li key={`${item.name}-${i}`} className="sig-item">
                     <strong className="sig-item-name">
@@ -263,12 +185,12 @@ export function SheetView() {
               </ul>
             </section>
           )}
-
-          {/* Special Abilities */}
+        </div>
+        <div className="sheet-col">
           {specialAbilities.length > 0 && (
             <section className="sheet-section" aria-label="Special abilities">
               <h2 className="section-title">Special Abilities</h2>
-              <ul className="abilities-list" aria-label="Special abilities">
+              <ul className="abilities-list">
                 {specialAbilities.map((ab, i) => (
                   <li key={`${ab.name}-${i}`} className="ability-item">
                     <strong className="ability-name">
@@ -281,40 +203,68 @@ export function SheetView() {
               </ul>
             </section>
           )}
-
-          {/* Custom Tracks */}
-          {customTracks.length > 0 && (
-            <section className="sheet-section" aria-label="Custom tracks">
-              <h2 className="section-title">Custom Tracks</h2>
-              <div className="tracks-list">
-                {customTracks.map((track) => (
-                  <div key={track.name} className="track-row">
-                    <span className="track-name">{track.name}</span>
-                    <span className="track-value">{track.current} / {track.max}</span>
-                    {track.levels && track.levels.length > 0 && (
-                      <div className="track-levels">
-                        {track.levels
-                          .filter((lvl) => lvl.atLevel <= track.current)
-                          .map((lvl) => (
-                            <div key={lvl.atLevel} className="track-level-item">
-                              <span className="track-level-num">Lvl {lvl.atLevel}:</span>
-                              <span className="track-level-desc">{lvl.description}</span>
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
         </div>
       </div>
 
-      {/* ---- Bottom Sections (full width) ---- */}
+      {/* ---- Special Mechanics (placeholder) ---- */}
+      <section className="sheet-section sheet-section-full sheet-section-mechanics" aria-label="Special mechanics">
+        <h2 className="section-title">Special Mechanics</h2>
+        <p className="mechanics-placeholder">No special mechanics active. The GM can enable mechanics like Wild Magic for this campaign.</p>
+      </section>
 
-      {/* Backstory */}
+      {/* ---- Strengths & Flaws (full width, two internal columns) ---- */}
+      {(strengths.length > 0 || flaws.length > 0) && (
+        <section className="sheet-section sheet-section-full" aria-label="Strengths and flaws">
+          <h2 className="section-title">Strengths &amp; Flaws</h2>
+          <div className="strength-flaw-grid">
+            <div className="strength-list">
+              <h3 className="subsection-title">Strengths</h3>
+              {strengths.length === 0 && <p className="empty-hint">None</p>}
+              <ul className="trait-entry-list">
+                {strengths.map((s, i) => {
+                  const entry = typeof s === 'string' ? { name: s, description: '' } : s;
+                  return (
+                    <li key={`str-${i}`} className="trait-entry trait-strength">
+                      <RichTraitView entry={entry} />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+            <div className="flaw-list">
+              <h3 className="subsection-title">Flaws</h3>
+              {flaws.length === 0 && <p className="empty-hint">None</p>}
+              <ul className="trait-entry-list">
+                {flaws.map((f, i) => {
+                  const entry = typeof f === 'string' ? { name: f, description: '' } : f;
+                  return (
+                    <li key={`flw-${i}`} className="trait-entry trait-flaw">
+                      <RichTraitView entry={entry} />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ---- Custom Tracks ---- */}
+      {customTracks.length > 0 && (
+        <section className="sheet-section sheet-section-full" aria-label="Custom tracks">
+          <h2 className="section-title">Custom Tracks</h2>
+          <div className="tracks-list">
+            {customTracks.map((track) => (
+              <div key={track.name} className="track-row">
+                <span className="track-name">{track.name}</span>
+                <span className="track-value">{track.current} / {track.max}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ---- Backstory ---- */}
       {backstory && (
         <section className="sheet-section sheet-section-full" aria-label="Backstory">
           <h2 className="section-title">
@@ -331,15 +281,7 @@ export function SheetView() {
         </section>
       )}
 
-      {/* Notes */}
-      {notes && (
-        <section className="sheet-section sheet-section-full" aria-label="Player notes">
-          <h2 className="section-title">Notes</h2>
-          <p className="notes-text">{notes}</p>
-        </section>
-      )}
-
-      {/* Campaign Notes (GM only) */}
+      {/* ---- Campaign Notes (GM only) ---- */}
       {isGM && campaignNotes && (
         <section className="sheet-section sheet-section-full sheet-section-gm" aria-label="GM campaign notes">
           <h2 className="section-title">Campaign Notes (GM Only)</h2>

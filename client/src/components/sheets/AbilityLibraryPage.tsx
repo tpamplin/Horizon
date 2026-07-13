@@ -33,7 +33,13 @@ export function AbilityLibraryPage() {
 
   return (
     <div className="item-library">
-      <header className="item-library-header"><h1>Ability Templates</h1><button className="btn-primary" onClick={() => setCreateOpen(true)}>+ New Template</button></header>
+      <header className="item-library-header">
+        <button className="sheet-back-btn" onClick={() => window.history.back()} aria-label="Back to previous page">
+          ← Back
+        </button>
+        <h1>Ability Templates</h1>
+        <button className="btn-primary" onClick={() => setCreateOpen(true)}>+ New Template</button>
+      </header>
       {error && <p className="error-msg" role="alert">{error}</p>}
       {createOpen && (
         <div className="create-modal" role="dialog" aria-label="Create ability template">

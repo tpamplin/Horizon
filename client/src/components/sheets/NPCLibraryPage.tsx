@@ -66,6 +66,9 @@ export function NPCLibraryPage() {
   return (
     <div className="npc-library">
       <header className="npc-library-header">
+        <button className="sheet-back-btn" onClick={() => navigate('/')} aria-label="Back to Dashboard">
+          ← Back to Dashboard
+        </button>
         <h1>My NPCs</h1>
         <button className="npc-library-create-btn" onClick={() => setCreateOpen(true)}>
           + New NPC

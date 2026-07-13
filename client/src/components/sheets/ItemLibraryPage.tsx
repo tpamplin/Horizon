@@ -64,6 +64,9 @@ export function ItemLibraryPage() {
   return (
     <div className="item-library">
       <header className="item-library-header">
+        <button className="sheet-back-btn" onClick={() => window.history.back()} aria-label="Back to previous page">
+          ← Back
+        </button>
         <h1>Item Templates</h1>
         <button className="btn-primary" onClick={() => setCreateOpen(true)}>+ New Template</button>
       </header>
