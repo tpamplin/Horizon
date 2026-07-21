@@ -22,6 +22,7 @@ import npcRoutes from './routes/npcs.js';
 import uploadRoutes from './routes/upload.js';
 import itemTemplateRoutes from './routes/item-templates.js';
 import abilityTemplateRoutes from './routes/ability-templates.js';
+import diceRoutes from './routes/dice.js';
 
 // -----------------------------------------------------------------------------
 // Fastify
@@ -80,6 +81,9 @@ await fastify.register(itemTemplateRoutes);
 
 // Ability template routes (protected — require JWT)
 await fastify.register(abilityTemplateRoutes);
+
+// Dice routes (protected — require JWT)
+await fastify.register(diceRoutes);
 
 // -----------------------------------------------------------------------------
 // Health Check
