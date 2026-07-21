@@ -10,6 +10,7 @@ import { CharacterLibraryPage } from './components/sheets/CharacterLibraryPage.j
 import { NewCharacterPage } from './components/sheets/NewCharacterPage.js';
 import { NPCLibraryPage } from './components/sheets/NPCLibraryPage.js';
 import { HomePage } from './components/home/HomePage.js';
+import { DicePage } from './components/dice/DicePage.js';
 import { useAuthStore } from './stores/authStore.js';
 
 /** Minimal placeholder for future feature pages. */
@@ -51,7 +52,7 @@ export function App() {
         >
           <Route index element={<PlaceholderPage title="Campaign" />} />
           <Route path="sheets" element={<PlaceholderPage title="Sheets" />} />
-          <Route path="dice" element={<PlaceholderPage title="Dice" />} />
+          <Route path="dice" element={<DicePage />} />
           <Route path="chat" element={<PlaceholderPage title="Chat" />} />
           <Route path="backgrounds" element={<PlaceholderPage title="Backgrounds" />} />
         </Route>

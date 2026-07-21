@@ -10,8 +10,11 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCharacterStore } from '../../stores/characterStore.js';
 import { SheetEdit } from './SheetEdit.js';
-import { STAT_KEYS, getStatDef, formatStatValue } from 'shared';
+import { STAT_KEYS } from 'shared';
 import type { Character, StatKey, SheetData } from 'shared';
+import { StatRollButton } from '../dice/StatRollButton.js';
+import { WeaponRollButton } from '../dice/WeaponRollButton.js';
+import { DiceAnimation } from '../dice/DiceAnimation.js';
 import './SheetView.css';
 
 // -----------------------------------------------------------------------------
@@ -142,7 +145,7 @@ export function SheetView() {
   }
 
   // View mode — render SheetView
-  const { stats, adversityTokens, strengths, flaws, signatureItems, specialAbilities, customTracks, backstory, campaignNotes } = sheetData;
+  const { adversityTokens, strengths, flaws, signatureItems, specialAbilities, customTracks, backstory, campaignNotes } = sheetData;
 
   return (
     <article className="sheet-view" aria-label={`Character sheet for ${char.name}`}>
@@ -230,23 +233,41 @@ export function SheetView() {
       {/* ---- Attributes + Adversity Strip ---- */}
       <section className="sheet-section sheet-attrs-tokens" aria-label="Character attributes and adversity tokens">
         <div className="attr-grid">
-          {STAT_KEYS.map((statKey: StatKey) => {
-            const statDef = getStatDef(statKey);
-            const value = stats[statKey] ?? 0;
-            const displayValue = formatStatValue(value);
-            return (
-              <div key={statKey} className="attr-card">
-                <span className="attr-die">{displayValue}</span>
-                <span className="attr-label">{statDef?.name ?? statKey}</span>
-              </div>
-            );
-          })}
+          {STAT_KEYS.map((statKey: StatKey) => (
+            <StatRollButton
+              key={statKey}
+              statKey={statKey}
+              modifier={0}
+              characterId={characterId}
+            />
+          ))}
         </div>
         <div className="tokens-display" aria-label={`${adversityTokens} adversity tokens`}>
           <span className="tokens-count">{adversityTokens}</span>
           <span className="tokens-label">Adversity Tokens</span>
         </div>
       </section>
+
+      {/* ---- Dice Animation (shown when rolling from sheet) ---- */}
+      <DiceAnimation adversityTokens={adversityTokens} />
+
+      {/* TEMPORARY — give 100 adversity tokens for testing */}
+      <button
+        type="button"
+        style={{ margin: '8px', padding: '4px 12px', background: '#a371f7', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'monospace', fontSize: '12px' }}
+        onClick={() => {
+          if (!characterId) return;
+          const char = useCharacterStore.getState().currentCharacter;
+          if (!char) return;
+          updateCharacter(
+            campaignId ?? '',
+            characterId,
+            { ...char.sheetData, adversityTokens: 100 },
+          );
+        }}
+      >
+        🧪 +100 Tokens
+      </button>
 
       {/* ---- Two Columns: Items (left) / Abilities (right) ---- */}
       <div className="sheet-body">
@@ -264,6 +285,7 @@ export function SheetView() {
                     <p className="sig-item-desc">{item.description}</p>
                     {item.modifiers && <p className="sig-item-mod"><em>{item.modifiers}</em></p>}
                     {item.rules && <p className="sig-item-rules">{item.rules}</p>}
+                    <WeaponRollButton item={item} characterId={characterId} />
                   </li>
                 ))}
               </ul>
