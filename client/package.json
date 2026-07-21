@@ -11,6 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "framer-motion": "^12.42.2",
     "leaflet": "^1.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
