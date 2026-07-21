@@ -3,8 +3,9 @@
 // =============================================================================
 
 import { describe, it, expect } from 'vitest';
-import { parseDicePool, resolveDiceRoll } from './dice.js';
+import { parseDicePool, resolveDiceRoll, applyModifiers } from './dice.js';
 import type { DicePool } from './dice.js';
+import type { ModifierSet } from '../types.js';
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -213,18 +214,28 @@ describe('parseDicePool', () => {
 describe('resolveDiceRoll', () => {
   describe('determinism with seeded RNG', () => {
     it('produces identical results with same seed', () => {
-      const pool: DicePool = { dice: [{ count: 3, sides: 6 }], adversity: 0, modifier: 0 };
-      const rng = seededRng([0.1, 0.5, 0.9]);
+      const pool: DicePool = {
+        dice: [{ count: 3, sides: 6 }],
+        adversity: 0,
+        modifier: 0,
+        exploding: false,
+      };
+      const rng = seededRng([0.1, 0.5, 0.3]);
 
       const result1 = resolveDiceRoll(pool, { rng });
-      const rng2 = seededRng([0.1, 0.5, 0.9]);
+      const rng2 = seededRng([0.1, 0.5, 0.3]);
       const result2 = resolveDiceRoll(pool, { rng: rng2 });
 
       expect(result1).toEqual(result2);
     });
 
     it('produces correct values with known RNG', () => {
-      const pool: DicePool = { dice: [{ count: 2, sides: 6 }], adversity: 0, modifier: 0 };
+      const pool: DicePool = {
+        dice: [{ count: 2, sides: 6 }],
+        adversity: 0,
+        modifier: 0,
+        exploding: false,
+      };
       // RNG values 0.0 → roll 1, 0.99 → roll 6
       const rng = seededRng([0.0, 0.99]);
 
@@ -264,8 +275,13 @@ describe('resolveDiceRoll', () => {
   });
 
   describe('die results are in valid range', () => {
-    it('standard dice produce values in [1, sides]', () => {
-      const pool: DicePool = { dice: [{ count: 100, sides: 20 }], adversity: 0, modifier: 0 };
+    it('standard dice produce values in [1, sides] when not exploding', () => {
+      const pool: DicePool = {
+        dice: [{ count: 100, sides: 20 }],
+        adversity: 0,
+        modifier: 0,
+        exploding: false,
+      };
       const result = resolveDiceRoll(pool);
       for (const die of result.dice) {
         expect(die.result).toBeGreaterThanOrEqual(1);
@@ -274,8 +290,8 @@ describe('resolveDiceRoll', () => {
       }
     });
 
-    it('adversity dice default to d6', () => {
-      const pool: DicePool = { dice: [], adversity: 50, modifier: 0 };
+    it('adversity dice default to d6 when not exploding', () => {
+      const pool: DicePool = { dice: [], adversity: 50, modifier: 0, exploding: false };
       const result = resolveDiceRoll(pool);
       for (const die of result.adversityResults) {
         expect(die.result).toBeGreaterThanOrEqual(1);
@@ -284,8 +300,8 @@ describe('resolveDiceRoll', () => {
       }
     });
 
-    it('adversity dice use custom sides', () => {
-      const pool: DicePool = { dice: [], adversity: 50, modifier: 0 };
+    it('adversity dice use custom sides when not exploding', () => {
+      const pool: DicePool = { dice: [], adversity: 50, modifier: 0, exploding: false };
       const result = resolveDiceRoll(pool, { adversitySides: 8 });
       for (const die of result.adversityResults) {
         expect(die.sides).toBe(8);
@@ -313,18 +329,28 @@ describe('resolveDiceRoll', () => {
 
   describe('total calculation', () => {
     it('sums standard dice correctly', () => {
-      const pool: DicePool = { dice: [{ count: 3, sides: 6 }], adversity: 0, modifier: 0 };
-      const rng = seededRng([0.1, 0.5, 0.9]);
+      const pool: DicePool = {
+        dice: [{ count: 3, sides: 6 }],
+        adversity: 0,
+        modifier: 0,
+        exploding: false,
+      };
+      const rng = seededRng([0.1, 0.5, 0.3]);
       const result = resolveDiceRoll(pool, { rng });
-      const expectedTotal = expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.9);
+      const expectedTotal = expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.3);
       expect(result.total).toBe(expectedTotal);
     });
 
     it('sums standard + adversity + modifier', () => {
-      const pool: DicePool = { dice: [{ count: 2, sides: 6 }], adversity: 1, modifier: 2 };
-      const rng = seededRng([0.1, 0.5, 0.9]);
+      const pool: DicePool = {
+        dice: [{ count: 2, sides: 6 }],
+        adversity: 1,
+        modifier: 2,
+        exploding: false,
+      };
+      const rng = seededRng([0.1, 0.5, 0.3]);
       const result = resolveDiceRoll(pool, { rng });
-      const expectedTotal = expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.9) + 2;
+      const expectedTotal = expectedDie(6, 0.1) + expectedDie(6, 0.5) + expectedDie(6, 0.3) + 2;
       expect(result.total).toBe(expectedTotal);
     });
   });
@@ -338,9 +364,228 @@ describe('resolveDiceRoll', () => {
     });
 
     it('import has no side effects', () => {
-      // If we got here, the import itself didn't cause issues.
-      // parseDicePool and resolveDiceRoll are both pure functions.
       expect(true).toBe(true);
+    });
+  });
+
+  describe('exploding dice', () => {
+    it('explodes when rolling max value on a d4', () => {
+      const pool: DicePool = { dice: [{ count: 1, sides: 4 }], adversity: 0, modifier: 0 };
+      // RNG: 0.99 → floor(3.96)+1 = 4 (max, triggers explode)
+      //       0.5  → floor(2.0)+1 = 3 (no explode)
+      const rng = seededRng([0.99, 0.5]);
+      const result = resolveDiceRoll(pool, { rng });
+
+      expect(result.dice).toHaveLength(1);
+      expect(result.dice[0]!.result).toBe(7); // 4 + 3
+      expect(result.dice[0]!.explosionChain).toEqual([4, 3]);
+      expect(result.total).toBe(7);
+    });
+
+    it('chains multiple explosions on a d4', () => {
+      const pool: DicePool = { dice: [{ count: 1, sides: 4 }], adversity: 0, modifier: 0 };
+      // 0.99 → 4 (explode), 0.99 → 4 (explode), 0.99 → 4 (explode), 0.5 → 3 (stop)
+      const rng = seededRng([0.99, 0.99, 0.99, 0.5]);
+      const result = resolveDiceRoll(pool, { rng });
+
+      expect(result.dice[0]!.result).toBe(15); // 4+4+4+3 = 15
+      expect(result.dice[0]!.explosionChain).toEqual([4, 4, 4, 3]);
+    });
+
+    it('does not explode when explosion is disabled', () => {
+      const pool: DicePool = {
+        dice: [{ count: 1, sides: 4 }],
+        adversity: 0,
+        modifier: 0,
+        exploding: false,
+      };
+      const rng = seededRng([0.99]); // would be 4 (max)
+      const result = resolveDiceRoll(pool, { rng });
+
+      expect(result.dice[0]!.result).toBe(4);
+      expect(result.dice[0]!.explosionChain).toBeUndefined();
+      expect(result.total).toBe(4);
+    });
+
+    it('does not explode on non-max values', () => {
+      const pool: DicePool = { dice: [{ count: 1, sides: 6 }], adversity: 0, modifier: 0 };
+      const rng = seededRng([0.5]); // roll = 4 (not max for d6)
+      const result = resolveDiceRoll(pool, { rng });
+
+      expect(result.dice[0]!.result).toBe(4);
+      expect(result.dice[0]!.explosionChain).toBeUndefined();
+    });
+
+    it('explodes only the specific die that hits max in a multi-die pool', () => {
+      const pool: DicePool = { dice: [{ count: 2, sides: 6 }], adversity: 0, modifier: 0 };
+      // Die 1: 0.99 → 6 (explode), 0.3 → 2 (stop) = 8
+      // Die 2: 0.5 → 4 (no explode) = 4
+      const rng = seededRng([0.99, 0.3, 0.5]);
+      const result = resolveDiceRoll(pool, { rng });
+
+      expect(result.dice).toHaveLength(2);
+      expect(result.dice[0]!.result).toBe(8);
+      expect(result.dice[0]!.explosionChain).toEqual([6, 2]);
+      expect(result.dice[1]!.result).toBe(4);
+      expect(result.dice[1]!.explosionChain).toBeUndefined();
+      expect(result.total).toBe(12);
+    });
+
+    it('adversity dice also explode', () => {
+      const pool: DicePool = { dice: [], adversity: 1, modifier: 0 };
+      // Default adversity sides = 6. 0.99 → 6 (explode), 0.3 → 2 (stop)
+      const rng = seededRng([0.99, 0.3]);
+      const result = resolveDiceRoll(pool, { rng });
+
+      expect(result.adversityResults[0]!.result).toBe(8); // 6 + 2
+      expect(result.adversityResults[0]!.explosionChain).toEqual([6, 2]);
+    });
+
+    it('exploding is on by default (pool.exploding defaults to true)', () => {
+      const pool: DicePool = { dice: [{ count: 1, sides: 4 }], adversity: 0, modifier: 0 };
+      const rng = seededRng([0.99, 0.5]); // 4 → explode → 3
+      const result = resolveDiceRoll(pool, { rng });
+      expect(result.dice[0]!.result).toBe(7);
+    });
+
+    it('options.exploding overrides pool.exploding', () => {
+      const pool: DicePool = {
+        dice: [{ count: 1, sides: 4 }],
+        adversity: 0,
+        modifier: 0,
+        exploding: false,
+      };
+      const rng = seededRng([0.99, 0.5]);
+      // options.exploding = true overrides pool.exploding = false
+      const result = resolveDiceRoll(pool, { rng, exploding: true });
+      expect(result.dice[0]!.result).toBe(7);
+    });
+  });
+});
+
+// -----------------------------------------------------------------------------
+// applyModifiers (HZN-229 integration contract)
+// -----------------------------------------------------------------------------
+
+describe('applyModifiers', () => {
+  const basePool: DicePool = { dice: [{ count: 1, sides: 10 }], adversity: 0, modifier: 0 };
+
+  describe('stat bonuses', () => {
+    it('adds a single stat bonus to pool modifier', () => {
+      const mods: ModifierSet = { statBonuses: { cognition: 5 } };
+      const result = applyModifiers(basePool, mods);
+      expect(result.modifier).toBe(5);
+    });
+
+    it('sums multiple stat bonuses', () => {
+      const mods: ModifierSet = {
+        statBonuses: { cognition: 5, force: 3, reflex: -2 },
+      };
+      const result = applyModifiers(basePool, mods);
+      expect(result.modifier).toBe(6); // 5 + 3 + (-2) = 6
+    });
+
+    it('adds stat bonuses on top of existing pool modifier', () => {
+      const pool: DicePool = {
+        dice: [{ count: 1, sides: 10 }],
+        adversity: 0,
+        modifier: 2,
+      };
+      const mods: ModifierSet = { statBonuses: { cognition: 5 } };
+      const result = applyModifiers(pool, mods);
+      expect(result.modifier).toBe(7); // 2 + 5 = 7
+    });
+  });
+
+  describe('flat bonus', () => {
+    it('adds flat bonus to pool modifier', () => {
+      const mods: ModifierSet = { flatBonus: 3 };
+      const result = applyModifiers(basePool, mods);
+      expect(result.modifier).toBe(3);
+    });
+
+    it('combines flat bonus with stat bonuses', () => {
+      const mods: ModifierSet = {
+        statBonuses: { cognition: 5 },
+        flatBonus: 2,
+      };
+      const result = applyModifiers(basePool, mods);
+      expect(result.modifier).toBe(7); // 5 + 2 = 7
+    });
+  });
+
+  describe('immutability', () => {
+    it('does not mutate the input pool', () => {
+      const pool: DicePool = {
+        dice: [{ count: 1, sides: 10 }],
+        adversity: 2,
+        modifier: 0,
+      };
+      const frozen = JSON.parse(JSON.stringify(pool)) as DicePool;
+      const mods: ModifierSet = { statBonuses: { cognition: 5 } };
+      applyModifiers(pool, mods);
+      expect(pool).toEqual(frozen);
+    });
+
+    it('returns a new object', () => {
+      const mods: ModifierSet = { flatBonus: 1 };
+      const result = applyModifiers(basePool, mods);
+      expect(result).not.toBe(basePool);
+    });
+  });
+
+  describe('source preservation', () => {
+    it('preserves existing source on pool', () => {
+      const pool: DicePool = {
+        ...basePool,
+        source: 'stat',
+      };
+      const result = applyModifiers(pool, { flatBonus: 1 });
+      expect(result.source).toBe('stat');
+    });
+
+    it('defaults source to custom when not set', () => {
+      const result = applyModifiers(basePool, { flatBonus: 1 });
+      expect(result.source).toBe('custom');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('returns pool unchanged when modifiers are empty', () => {
+      const result = applyModifiers(basePool, {});
+      expect(result.modifier).toBe(0);
+      expect(result.dice).toEqual(basePool.dice);
+    });
+
+    it('handles negative stat bonuses', () => {
+      const mods: ModifierSet = { statBonuses: { cognition: -3 } };
+      const result = applyModifiers(basePool, mods);
+      expect(result.modifier).toBe(-3);
+    });
+
+    it('handles empty statBonuses object', () => {
+      const mods: ModifierSet = { statBonuses: {} };
+      const result = applyModifiers(basePool, mods);
+      expect(result.modifier).toBe(0);
+    });
+
+    it('handles zero flat bonus', () => {
+      const mods: ModifierSet = { flatBonus: 0 };
+      const result = applyModifiers(basePool, mods);
+      expect(result.modifier).toBe(0);
+    });
+
+    it('preserves dice and adversity from original pool', () => {
+      const pool: DicePool = {
+        dice: [{ count: 3, sides: 6 }],
+        adversity: 4,
+        modifier: 0,
+      };
+      const mods: ModifierSet = { flatBonus: 10 };
+      const result = applyModifiers(pool, mods);
+      expect(result.dice).toEqual(pool.dice);
+      expect(result.adversity).toBe(4);
+      expect(result.modifier).toBe(10);
     });
   });
 });

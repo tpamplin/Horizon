@@ -757,8 +757,119 @@ export interface SessionAttendance {
 export interface DieResult {
   /** The number of sides on this die (e.g. 6 for a d6). */
   sides: number;
-  /** The result rolled on this die (1–sides). */
+  /** The result rolled on this die (1–sides). Includes all explosion additions. */
   result: number;
+  /**
+   * The full explosion chain if the die exploded. Each element is a single roll.
+   * The first element is the original roll, subsequent elements are re-rolls.
+   * E.g. [4, 4, 4, 2] means: rolled 4 → exploded → rolled 4 → exploded → rolled 4 → exploded → rolled 2.
+   * Undefined if no explosion occurred.
+   */
+  explosionChain?: number[];
+}
+
+/**
+ * The origin of a dice roll — determines how the UI labels and groups rolls.
+ * - `stat` — Rolled by clicking a stat die on a character sheet.
+ * - `weapon` — Rolled by clicking a weapon's attack button.
+ * - `custom` — Freeform roll from the dice tray.
+ */
+export type RollSource = 'stat' | 'weapon' | 'custom';
+
+/**
+ * A set of modifiers applied to a dice roll, typically computed from equipped
+ * items and abilities. HZN-229 (Expanded Items & Abilities) will populate this
+ * from the character's equipment; HZN-244 defines the contract.
+ */
+export interface ModifierSet {
+  /** Per-stat bonuses keyed by stat name (e.g. { "cognition": 5 }). */
+  statBonuses?: Record<string, number>;
+  /** A flat bonus added to the total after all other modifiers. */
+  flatBonus?: number;
+  /** Human-readable source label (e.g. "Pirate Hat", "Blessed"). */
+  source?: string;
+}
+
+/**
+ * Request body for POST /api/dice/roll.
+ */
+export interface DiceRollRequest {
+  /** The dice pool to roll. */
+  pool: import('./rules/dice.js').DicePool;
+  /** Why the roll was made (e.g. "Cognition check"). */
+  reason?: string;
+  /** The character making the roll (optional — freeform rolls don't need one). */
+  character_id?: string;
+  /** Optional modifiers from items/abilities. HZN-229 will populate this. */
+  modifiers?: ModifierSet;
+}
+
+/**
+ * Request body for POST /api/dice/boost — spend an adversity token to
+ * increase a specific roll in a die's explosion chain by +1. If this pushes
+ * the value to the die's max, it triggers a new explosion roll.
+ */
+export interface DiceBoostRequest {
+  /** The pool that produced the original roll. */
+  pool: import('./rules/dice.js').DicePool;
+  /** The current result to modify. */
+  currentResult: import('./rules/dice.js').RollResult;
+  /** Index of the die in the result.dice array to boost. */
+  dieIndex: number;
+  /** Position in the die's explosionChain to boost (0 = first roll). */
+  chainPosition: number;
+  /** Character ID for token deduction. */
+  character_id?: string;
+}
+
+/**
+ * Response from POST /api/dice/roll.
+ */
+export interface DiceRollResponse {
+  /** Unique identifier for this roll (matches the dice_logs row). */
+  id: string;
+  /** The dice pool that was rolled. */
+  pool: import('./rules/dice.js').DicePool;
+  /** The modifiers that were applied (echoed back for UI display). */
+  modifiers?: ModifierSet;
+  /** The resolved roll result with individual dice and total. */
+  result: import('./rules/dice.js').RollResult;
+  /** Reason for the roll. */
+  reason?: string;
+  /** The character ID if the roll was for a specific character. */
+  character_id?: string;
+  /** The user who requested the roll. */
+  roller_user_id: string;
+  /** ISO 8601 timestamp of when the roll occurred. */
+  created_at: string;
+}
+
+/**
+ * A single entry in the dice log, as returned by GET /api/campaigns/:id/dice-log.
+ */
+export interface DiceLogEntry {
+  /** Unique identifier for this log entry. */
+  id: string;
+  /** The campaign this roll belongs to. */
+  campaign_id: string;
+  /** The character the roll was made for (null for freeform rolls). */
+  character_id?: string | null;
+  /** The user who requested the roll. */
+  roller_user_id: string;
+  /** Display name of the user who rolled (joined from users table). */
+  roller_display_name?: string;
+  /** The dice pool serialized as JSON. */
+  pool_json: string;
+  /** The modifiers serialized as JSON (null if no modifiers). */
+  modifiers_json?: string | null;
+  /** The origin of the roll: 'stat', 'weapon', or 'custom'. */
+  roll_source: RollSource;
+  /** The roll result serialized as JSON. */
+  result_json: string;
+  /** Why the roll was made. */
+  reason?: string | null;
+  /** ISO 8601 timestamp of when the roll occurred. */
+  created_at: string;
 }
 
 /**

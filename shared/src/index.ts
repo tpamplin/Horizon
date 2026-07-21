@@ -49,6 +49,12 @@ export type {
   Session,
   SessionAttendance,
   DieResult,
+  RollSource,
+  ModifierSet,
+  DiceRollRequest,
+  DiceRollResponse,
+  DiceLogEntry,
+  DiceBoostRequest,
   DiceRoll,
   DiceChatContent,
   SystemChatContent,
@@ -68,7 +74,7 @@ export type {
 
 export type { DiceGroup, DicePool, RollResult, DieSides, ResolveOptions } from './rules/dice.js';
 
-export { parseDicePool, resolveDiceRoll } from './rules/dice.js';
+export { parseDicePool, resolveDiceRoll, applyModifiers, boostDie } from './rules/dice.js';
 
 export type {
   StatKey,

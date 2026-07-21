@@ -8,7 +8,7 @@
 // See plan/vtt-design-doc.md §4.5 for the dice engine design.
 // =============================================================================
 
-import type { DieResult } from '../types.js';
+import type { DieResult, ModifierSet } from '../types.js';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -49,6 +49,10 @@ export interface DicePool {
   adversity: number;
   /** Flat modifier applied to the total (+N or -N). 0 if none. */
   modifier: number;
+  /** The origin of this dice pool: 'stat', 'weapon', or 'custom'. Defaults to 'custom'. */
+  source?: 'stat' | 'weapon' | 'custom';
+  /** Whether dice explode on max value. Defaults to true (on). Set false for crit checks etc. */
+  exploding?: boolean;
 }
 
 /**
@@ -204,6 +208,11 @@ export interface ResolveOptions {
    * Defaults to d6 if not specified.
    */
   adversitySides?: DieSides;
+  /**
+   * Whether dice explode on max value. Overrides pool.exploding if set.
+   * Defaults to pool.exploding (which defaults to true).
+   */
+  exploding?: boolean;
 }
 
 /**
@@ -234,22 +243,46 @@ function rollDie(sides: number, rng: () => number): number {
 export function resolveDiceRoll(pool: DicePool, options: ResolveOptions = {}): RollResult {
   const rng = options.rng ?? Math.random;
   const adversitySides = options.adversitySides ?? DEFAULT_ADVERSITY_SIDES;
+  // Exploding is on by default; can be overridden by options or pool.exploding = false
+  const exploding = options.exploding ?? pool.exploding ?? true;
 
   const dice: DieResult[] = [];
   const adversityResults: DieResult[] = [];
 
-  // Roll standard dice
+  // Roll standard dice with explosion support
   for (const group of pool.dice) {
     for (let i = 0; i < group.count; i++) {
-      const result = rollDie(group.sides, rng);
-      dice.push({ sides: group.sides, result });
+      let total = 0;
+      const chain: number[] = [];
+      let rolled: number;
+      do {
+        rolled = rollDie(group.sides, rng);
+        total += rolled;
+        chain.push(rolled);
+      } while (rolled === group.sides && exploding);
+      dice.push({
+        sides: group.sides,
+        result: total,
+        ...(chain.length > 1 ? { explosionChain: chain } : {}),
+      });
     }
   }
 
-  // Roll adversity dice
+  // Roll adversity dice (also support exploding for consistency)
   for (let i = 0; i < pool.adversity; i++) {
-    const result = rollDie(adversitySides, rng);
-    adversityResults.push({ sides: adversitySides, result });
+    let total = 0;
+    const chain: number[] = [];
+    let rolled: number;
+    do {
+      rolled = rollDie(adversitySides, rng);
+      total += rolled;
+      chain.push(rolled);
+    } while (rolled === adversitySides && exploding);
+    adversityResults.push({
+      sides: adversitySides,
+      result: total,
+      ...(chain.length > 1 ? { explosionChain: chain } : {}),
+    });
   }
 
   // Compute total
@@ -262,5 +295,105 @@ export function resolveDiceRoll(pool: DicePool, options: ResolveOptions = {}): R
     adversityResults,
     modifier: pool.modifier,
     total,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Modifier Application (HZN-229 integration contract)
+// -----------------------------------------------------------------------------
+
+/**
+ * Apply a ModifierSet to a DicePool, producing a new DicePool with modifiers
+ * merged in. This is a **pure function** — it does not mutate the input.
+ *
+ * The ModifierSet is the contract between HZN-244 (Dice Engine) and HZN-229
+ * (Expanded Items & Abilities). HZN-229 computes `ModifierSet` from equipped
+ * items and abilities; this function applies it to the dice pool.
+ *
+ * - `statBonuses`: summed and added to `pool.modifier`.
+ * - `flatBonus`: added directly to `pool.modifier`.
+ * - The `source` field is preserved in the returned pool for logging.
+ *
+ * @param pool — The base dice pool to apply modifiers to.
+ * @param modifiers — The modifier set computed from items/abilities.
+ * @returns A new DicePool with modifiers merged into the flat modifier.
+ *
+ * @example
+ * ```ts
+ * const pool = { dice: [{ count: 1, sides: 10 }], adversity: 0, modifier: 0 };
+ * const mods = { statBonuses: { cognition: 5 }, source: 'Pirate Hat' };
+ * const adjusted = applyModifiers(pool, mods);
+ * // adjusted.modifier === 5
+ * ```
+ */
+export function applyModifiers(pool: DicePool, modifiers: ModifierSet): DicePool {
+  let totalModifier = pool.modifier;
+
+  if (modifiers.statBonuses) {
+    for (const bonus of Object.values(modifiers.statBonuses)) {
+      totalModifier += bonus;
+    }
+  }
+
+  if (modifiers.flatBonus) {
+    totalModifier += modifiers.flatBonus;
+  }
+
+  return {
+    ...pool,
+    modifier: totalModifier,
+    source: pool.source ?? 'custom',
+  };
+}
+
+// -----------------------------------------------------------------------------
+// Adversity Token Boost
+// -----------------------------------------------------------------------------
+
+/**
+ * Boost the last roll in a die's explosion chain by +1 (spend an adversity token).
+ * If the boosted value reaches the die's maximum, it triggers another explosion.
+ *
+ * @param die — The die result to boost (must have an explosionChain).
+ * @param rng — Random number generator for potential explosion re-rolls.
+ * @returns A new DieResult with the boosted chain and updated total, or the
+ *          original die unchanged if there's no chain to boost.
+ *
+ * @example
+ * ```ts
+ * // Chain: [4, 3] on a d4. Boost last (3 → 4). 4 triggers explosion → roll 2.
+ * const boosted = boostDie({ sides: 4, result: 7, explosionChain: [4, 3] }, Math.random);
+ * // boosted.explosionChain === [4, 4, 2], boosted.result === 10
+ * ```
+ */
+export function boostDie(die: DieResult, rng: () => number = Math.random): DieResult {
+  const sides = die.sides;
+
+  // If no explosion chain, create one from the raw result so single rolls
+  // can be boosted (e.g., d4 rolls 3 → boost to 4 → triggers explosion).
+  const chain =
+    die.explosionChain && die.explosionChain.length > 0 ? [...die.explosionChain] : [die.result];
+
+  const newChain = [...chain];
+  const lastIdx = newChain.length - 1;
+
+  // Boost the last roll by 1
+  newChain[lastIdx] = newChain[lastIdx]! + 1;
+
+  // Check if the boosted value hits max → explode
+  let current = newChain[lastIdx]!;
+  while (current === sides) {
+    const extra = rollDie(sides, rng);
+    newChain.push(extra);
+    current = extra;
+  }
+
+  // Recalculate total
+  const newTotal = newChain.reduce((sum, v) => sum + v, 0);
+
+  return {
+    sides,
+    result: newTotal,
+    explosionChain: newChain.length > 1 ? newChain : undefined,
   };
 }
