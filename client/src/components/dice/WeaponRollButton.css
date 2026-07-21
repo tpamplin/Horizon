@@ -1,0 +1,44 @@
+/* =============================================================================
+   Horizon — WeaponRollButton Styles
+   ============================================================================= */
+
+.weapon-roll-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin-left: var(--space-2, 0.5rem);
+  white-space: nowrap;
+}
+
+.weapon-roll-btn:hover:not(:disabled) {
+  background: var(--color-surface-overlay);
+  border-color: var(--color-accent);
+}
+
+.weapon-roll-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.weapon-roll-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.weapon-roll-btn-icon {
+  font-size: var(--font-size-md);
+}
+
+.weapon-roll-btn-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+}

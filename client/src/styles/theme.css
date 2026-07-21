@@ -62,6 +62,11 @@
   --color-die-face: #21262d;       /* individual die face color */
   --color-die-pip: #e6edf3;        /* die pip / number color */
 
+  /* Modifier badges — HZN-229 integration contract */
+  --modifier-positive: #3fb950;
+  --modifier-negative: #f85149;
+  --modifier-zero: #484f58;
+
   /* =========================================================================
      Borders & Dividers
      ========================================================================= */

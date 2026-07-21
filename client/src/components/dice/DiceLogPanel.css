@@ -1,0 +1,207 @@
+/* =============================================================================
+   Horizon — DiceLogPanel Styles
+   ============================================================================= */
+
+.dice-log-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---- Scrollable List ---- */
+
+.dl-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-2, 0.5rem) 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.dl-list:focus {
+  outline: none;
+}
+
+/* ---- Entry Card ---- */
+
+.dl-entry {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: var(--space-3, 0.75rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  animation: dl-slide-in 0.25s ease-out;
+}
+
+@keyframes dl-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Entry Header ---- */
+
+.dl-entry-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  font-size: var(--font-size-xs);
+}
+
+.dl-entry-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.dl-entry-source[title*="Stat"] {
+  background: var(--color-accent-muted);
+  color: var(--color-accent);
+}
+
+.dl-entry-source[title*="Weapon"] {
+  background: var(--color-error-muted);
+  color: var(--color-error);
+}
+
+.dl-entry-source[title*="Custom"] {
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+}
+
+.dl-entry-user {
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.dl-entry-time {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+/* ---- Entry Body (dice + total) ---- */
+
+.dl-entry-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+}
+
+.dl-entry-dice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.dl-die-pip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  background: var(--color-die-face);
+  color: var(--color-die-pip);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+.dl-die-pip--exploded {
+  background: var(--color-warning-muted);
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dl-adversity-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  font-weight: var(--font-weight-medium);
+}
+
+.dl-entry-total {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-dice-success);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ---- Reason & Modifiers ---- */
+
+.dl-entry-reason {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-style: italic;
+}
+
+.dl-entry-modifiers {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  padding: 4px 8px;
+  background: var(--color-surface-raised);
+  border-radius: 4px;
+  border-left: 3px solid var(--color-accent);
+}
+
+/* ---- Empty & Error States ---- */
+
+.dl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8, 2rem);
+  color: var(--color-text-muted);
+  text-align: center;
+  gap: var(--space-3, 0.75rem);
+}
+
+.dl-retry-btn {
+  padding: var(--space-1, 0.25rem) var(--space-4, 1rem);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.dl-retry-btn:hover {
+  background: var(--color-surface-overlay);
+  border-color: var(--color-accent);
+}
+
+/* ---- Skeleton Loading ---- */
+
+.dl-entry--skeleton {
+  animation: none;
+  opacity: 0.6;
+}
+
+.dl-skeleton-line {
+  height: 12px;
+  background: var(--color-surface-raised);
+  border-radius: 4px;
+  animation: dl-pulse 1.5s ease-in-out infinite;
+}
+
+.dl-skeleton-line--short  { width: 30%; }
+.dl-skeleton-line--medium { width: 60%; }
+.dl-skeleton-line--long   { width: 90%; }
+
+@keyframes dl-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.8; }
+}

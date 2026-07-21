@@ -1,0 +1,91 @@
+/* =============================================================================
+   Horizon — DiceTray Styles
+   ============================================================================= */
+
+.dice-tray {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-4, 1rem);
+  background: var(--color-dice-tray);
+  border: 1px solid var(--color-dice-tray-border);
+  border-radius: 8px;
+}
+
+.dice-tray-input-row {
+  display: flex;
+  gap: var(--space-2, 0.5rem);
+}
+
+.dice-tray-input {
+  flex: 1;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-md);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.dice-tray-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-muted);
+}
+
+.dice-tray-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dice-tray-roll-btn {
+  padding: var(--space-2, 0.5rem) var(--space-5, 1.25rem);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: 6px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.dice-tray-roll-btn:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.dice-tray-roll-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dice-tray-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 0.5rem);
+}
+
+.dice-tray-quick-btn {
+  padding: var(--space-1, 0.25rem) var(--space-3, 0.75rem);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dice-tray-quick-btn:hover:not(:disabled) {
+  background: var(--color-surface-overlay);
+  border-color: var(--color-accent);
+}
+
+.dice-tray-quick-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
